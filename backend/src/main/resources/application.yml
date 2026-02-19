@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gogo
+    username: gogo_user
+    password: gogo_pass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.gogo: DEBUG
+    org.hibernate.SQL: DEBUG

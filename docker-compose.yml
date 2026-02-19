@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gogo-postgres
+    environment:
+      POSTGRES_DB: gogo
+      POSTGRES_USER: gogo_user
+      POSTGRES_PASSWORD: gogo_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - gogo-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gogo_user -d gogo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  gogo-postgres-data:
