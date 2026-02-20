@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getGroup, getGroupPlaces, sharePlaceToGroup, Group, GroupPlace } from '@/lib/api/groups';
 import { getPlaces, Place } from '@/lib/api/places';
+import { createMeeting } from '@/lib/api/meetings';
 
 const CATEGORY_LABEL: Record<string, string> = {
   CAFE: '☕', RESTAURANT: '🍽️', BAR: '🍺', ACTIVITY: '🎯', ETC: '📍',
@@ -19,7 +20,9 @@ export default function GroupDetailPage() {
   const [myPlaces, setMyPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [shareModal, setShareModal] = useState(false);
+  const [meetingModal, setMeetingModal] = useState(false);
   const [shareForm, setShareForm] = useState({ placeId: '', sharedBy: '' });
+  const [meetingForm, setMeetingForm] = useState({ title: '', candidatePlaceIds: [] as number[] });
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -47,6 +50,31 @@ export default function GroupDetailPage() {
     }
   };
 
+  const toggleCandidate = (placeId: number) => {
+    setMeetingForm(f => ({
+      ...f,
+      candidatePlaceIds: f.candidatePlaceIds.includes(placeId)
+        ? f.candidatePlaceIds.filter(id => id !== placeId)
+        : [...f.candidatePlaceIds, placeId],
+    }));
+  };
+
+  const handleCreateMeeting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (meetingForm.candidatePlaceIds.length < 2) {
+      alert('후보 장소를 2개 이상 선택해주세요.');
+      return;
+    }
+    try {
+      const meeting = await createMeeting(groupId, meetingForm.title, meetingForm.candidatePlaceIds);
+      setMeetingModal(false);
+      setMeetingForm({ title: '', candidatePlaceIds: [] });
+      router.push(`/meetings/${meeting.id}?groupId=${groupId}`);
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
@@ -64,6 +92,12 @@ export default function GroupDetailPage() {
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
           <button onClick={() => router.push('/groups')} className="text-gray-400 hover:text-gray-600">←</button>
           <h1 className="text-xl font-bold text-gray-900 flex-1 truncate">{group.name}</h1>
+          {groupPlaces.length >= 2 && (
+            <button onClick={() => setMeetingModal(true)}
+              className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-xl transition">
+              🗳️ 약속 만들기
+            </button>
+          )}
         </div>
       </header>
 
@@ -105,6 +139,11 @@ export default function GroupDetailPage() {
               + 장소 공유
             </button>
           </div>
+
+          {groupPlaces.length < 2 && (
+            <p className="text-xs text-gray-400 mb-2">※ 장소를 2개 이상 공유하면 약속 만들기가 가능해요</p>
+          )}
+
           {groupPlaces.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
               <p className="text-3xl mb-2">📭</p>
@@ -159,6 +198,53 @@ export default function GroupDetailPage() {
               <button type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-2.5 text-sm font-medium transition">
                 공유하기
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 약속 만들기 모달 */}
+      {meetingModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+          <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-xl max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-900">약속 만들기</h2>
+              <button onClick={() => setMeetingModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <form onSubmit={handleCreateMeeting} className="space-y-4">
+              <input required placeholder="약속 이름 (예: 이번 주 약속)"
+                value={meetingForm.title}
+                onChange={e => setMeetingForm(f => ({ ...f, title: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">후보 장소 선택 (2개 이상)</p>
+                <div className="space-y-2">
+                  {groupPlaces.map(gp => (
+                    <label key={gp.id}
+                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                        meetingForm.candidatePlaceIds.includes(gp.place.id)
+                          ? 'border-indigo-400 bg-indigo-50'
+                          : 'border-gray-200 hover:border-indigo-200'
+                      }`}>
+                      <input type="checkbox"
+                        checked={meetingForm.candidatePlaceIds.includes(gp.place.id)}
+                        onChange={() => toggleCandidate(gp.place.id)}
+                        className="hidden"
+                      />
+                      <span className="text-lg">{CATEGORY_LABEL[gp.place.category] ?? '📍'}</span>
+                      <span className="text-sm font-medium text-gray-800">{gp.place.name}</span>
+                      {meetingForm.candidatePlaceIds.includes(gp.place.id) && (
+                        <span className="ml-auto text-indigo-600 text-sm">✓</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <button type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-2.5 text-sm font-medium transition">
+                약속 만들기
               </button>
             </form>
           </div>
