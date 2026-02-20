@@ -34,7 +34,7 @@ public class Group {
         group.name = name;
         group.inviteCode = inviteCode;
         group.createdBy = createdBy;
-        group.members = members != null ? members : new ArrayList<>();
+        group.members = members != null ? new ArrayList<>(members) : new ArrayList<>();
         group.createdAt = createdAt;
         return group;
     }
