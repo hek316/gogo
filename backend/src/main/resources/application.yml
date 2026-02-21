@@ -1,20 +1,20 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/gogo
-    username: gogo_user
-    password: gogo_pass
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gogo}
+    username: ${DB_USERNAME:gogo_user}
+    password: ${DB_PASSWORD:gogo_pass}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 logging:
   level:
