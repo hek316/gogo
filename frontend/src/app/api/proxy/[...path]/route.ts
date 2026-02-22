@@ -8,7 +8,7 @@ async function handler(
 ) {
   const { path } = await params;
   const search = req.nextUrl.search;
-  const url = `${BACKEND_URL}/api/${path.join('/')}${search}`;
+  const url = `${BACKEND_URL}/${path.join('/')}${search}`;
 
   const headers = new Headers();
   req.headers.forEach((value, key) => {
