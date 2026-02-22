@@ -26,8 +26,8 @@ class GetPlacesUseCaseTest {
     @Test
     void 전체_장소_목록_조회() {
         given(placeRepository.findAll()).willReturn(List.of(
-                Place.create("카페A", "서울", "CAFE", null, null, "홍길동"),
-                Place.create("식당B", "서울", "RESTAURANT", null, null, "김철수")
+                Place.create("카페A", "서울", "CAFE", null, null, null, "홍길동"),
+                Place.create("식당B", "서울", "RESTAURANT", null, null, null, "김철수")
         ));
 
         List<PlaceResponse> result = getPlacesUseCase.execute(null);
@@ -38,7 +38,7 @@ class GetPlacesUseCaseTest {
     @Test
     void 카테고리별_필터링() {
         given(placeRepository.findByCategory("CAFE")).willReturn(List.of(
-                Place.create("카페A", "서울", "CAFE", null, null, "홍길동")
+                Place.create("카페A", "서울", "CAFE", null, null, null, "홍길동")
         ));
 
         List<PlaceResponse> result = getPlacesUseCase.execute("CAFE");

@@ -32,7 +32,7 @@ class SharePlaceToGroupUseCaseTest {
 
     @Test
     void 장소_공유_성공() {
-        Place place = Place.create("성수동 카페", "서울", "CAFE", null, null, "홍길동");
+        Place place = Place.create("성수동 카페", "서울", "CAFE", null, null, null, "홍길동");
         given(placeRepository.findById(1L)).willReturn(Optional.of(place));
         GroupPlace saved = GroupPlace.create(1L, 1L, "홍길동");
         given(groupPlaceRepository.save(any())).willReturn(saved);

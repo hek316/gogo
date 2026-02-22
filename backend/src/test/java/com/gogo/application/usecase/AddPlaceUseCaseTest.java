@@ -26,9 +26,9 @@ class AddPlaceUseCaseTest {
 
     @Test
     void 유효한_데이터로_장소_추가_성공() {
-        AddPlaceRequest request = new AddPlaceRequest("성수동 카페", "서울 성동구", "CAFE", "https://naver.me/xxx", "분위기 좋음", "홍길동");
+        AddPlaceRequest request = new AddPlaceRequest("성수동 카페", "서울 성동구", "CAFE", "https://naver.me/xxx", "분위기 좋음", null, "홍길동");
 
-        Place saved = Place.create(request.name(), request.address(), request.category(), request.url(), request.note(), request.createdBy());
+        Place saved = Place.create(request.name(), request.address(), request.category(), request.url(), request.note(), request.imageUrl(), request.createdBy());
         given(placeRepository.save(any(Place.class))).willReturn(saved);
 
         PlaceResponse response = addPlaceUseCase.execute(request);
@@ -39,7 +39,7 @@ class AddPlaceUseCaseTest {
 
     @Test
     void 이름없는_장소_추가시_예외() {
-        AddPlaceRequest request = new AddPlaceRequest("", "서울 성동구", "CAFE", null, null, "홍길동");
+        AddPlaceRequest request = new AddPlaceRequest("", "서울 성동구", "CAFE", null, null, null, "홍길동");
 
         assertThatThrownBy(() -> addPlaceUseCase.execute(request))
                 .isInstanceOf(IllegalArgumentException.class);

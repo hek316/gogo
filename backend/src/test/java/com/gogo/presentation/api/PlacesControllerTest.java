@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.usecase.AddPlaceUseCase;
 import com.gogo.application.usecase.DeletePlaceUseCase;
+import com.gogo.application.usecase.FetchPlacePreviewUseCase;
 import com.gogo.application.usecase.GetPlaceUseCase;
 import com.gogo.application.usecase.GetPlacesUseCase;
+import com.gogo.application.usecase.GetPopularPlacesUseCase;
+import com.gogo.application.usecase.GetRecentPlacesUseCase;
 import com.gogo.application.usecase.MarkPlaceVisitedUseCase;
 import com.gogo.domain.entity.PlaceStatus;
 import org.junit.jupiter.api.Test;
@@ -49,9 +52,18 @@ class PlacesControllerTest {
     @MockitoBean
     private MarkPlaceVisitedUseCase markPlaceVisitedUseCase;
 
+    @MockitoBean
+    private GetPopularPlacesUseCase getPopularPlacesUseCase;
+
+    @MockitoBean
+    private GetRecentPlacesUseCase getRecentPlacesUseCase;
+
+    @MockitoBean
+    private FetchPlacePreviewUseCase fetchPlacePreviewUseCase;
+
     @Test
     void POST_api_places_성공() throws Exception {
-        PlaceResponse response = new PlaceResponse(1L, "성수동 카페", "서울 성동구", "CAFE", null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now());
+        PlaceResponse response = new PlaceResponse(1L, "성수동 카페", "서울 성동구", "CAFE", null, null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now());
         given(addPlaceUseCase.execute(any())).willReturn(response);
 
         mockMvc.perform(post("/api/places")
@@ -65,7 +77,7 @@ class PlacesControllerTest {
 
     @Test
     void GET_api_places_목록_반환() throws Exception {
-        PlaceResponse place = new PlaceResponse(1L, "카페A", "서울", "CAFE", null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now());
+        PlaceResponse place = new PlaceResponse(1L, "카페A", "서울", "CAFE", null, null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now());
         given(getPlacesUseCase.execute(isNull())).willReturn(List.of(place));
 
         mockMvc.perform(get("/api/places"))
