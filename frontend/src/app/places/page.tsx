@@ -23,6 +23,8 @@ export default function PlacesPage() {
     try {
       const data = await getPlaces(category || undefined);
       setPlaces(data);
+    } catch {
+      setPlaces([]);
     } finally {
       setLoading(false);
     }
