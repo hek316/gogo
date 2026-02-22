@@ -1,6 +1,7 @@
 package com.gogo.presentation.api;
 
 import com.gogo.application.dto.AddPlaceRequest;
+import com.gogo.application.dto.PlacePreviewResponse;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.usecase.*;
 import jakarta.validation.Valid;
@@ -19,17 +20,26 @@ public class PlacesController {
     private final GetPlaceUseCase getPlaceUseCase;
     private final DeletePlaceUseCase deletePlaceUseCase;
     private final MarkPlaceVisitedUseCase markPlaceVisitedUseCase;
+    private final GetPopularPlacesUseCase getPopularPlacesUseCase;
+    private final GetRecentPlacesUseCase getRecentPlacesUseCase;
+    private final FetchPlacePreviewUseCase fetchPlacePreviewUseCase;
 
     public PlacesController(AddPlaceUseCase addPlaceUseCase,
                             GetPlacesUseCase getPlacesUseCase,
                             GetPlaceUseCase getPlaceUseCase,
                             DeletePlaceUseCase deletePlaceUseCase,
-                            MarkPlaceVisitedUseCase markPlaceVisitedUseCase) {
+                            MarkPlaceVisitedUseCase markPlaceVisitedUseCase,
+                            GetPopularPlacesUseCase getPopularPlacesUseCase,
+                            GetRecentPlacesUseCase getRecentPlacesUseCase,
+                            FetchPlacePreviewUseCase fetchPlacePreviewUseCase) {
         this.addPlaceUseCase = addPlaceUseCase;
         this.getPlacesUseCase = getPlacesUseCase;
         this.getPlaceUseCase = getPlaceUseCase;
         this.deletePlaceUseCase = deletePlaceUseCase;
         this.markPlaceVisitedUseCase = markPlaceVisitedUseCase;
+        this.getPopularPlacesUseCase = getPopularPlacesUseCase;
+        this.getRecentPlacesUseCase = getRecentPlacesUseCase;
+        this.fetchPlacePreviewUseCase = fetchPlacePreviewUseCase;
     }
 
     @PostMapping
@@ -56,5 +66,22 @@ public class PlacesController {
     @PatchMapping("/{id}/visit")
     public ResponseEntity<PlaceResponse> markVisited(@PathVariable Long id) {
         return ResponseEntity.ok(markPlaceVisitedUseCase.execute(id));
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<PlaceResponse>> getPopularPlaces(
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(getPopularPlacesUseCase.execute(limit));
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<List<PlaceResponse>> getRecentPlaces(
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(getRecentPlacesUseCase.execute(limit));
+    }
+
+    @GetMapping("/preview")
+    public ResponseEntity<PlacePreviewResponse> previewPlace(@RequestParam String url) {
+        return ResponseEntity.ok(fetchPlacePreviewUseCase.execute(url));
     }
 }

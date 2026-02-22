@@ -8,5 +8,6 @@ public record AddPlaceRequest(
         String category,
         String url,
         String note,
+        String imageUrl,
         @NotBlank(message = "작성자는 필수입니다.") String createdBy
 ) {}

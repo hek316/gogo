@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getMeeting, vote, finalizeMeeting, Meeting, VoteResult } from '@/lib/api/meetings';
 import { getPlaces, Place } from '@/lib/api/places';
+import { ChevronLeft, Sparkles } from 'lucide-react';
 
 export default function MeetingPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,24 +59,28 @@ export default function MeetingPage() {
   const myVote = (result: VoteResult) => result.voters.includes(nickname);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="w-8 h-8 border-4 border-surface border-t-mint rounded-full animate-spin" />
     </div>
   );
 
-  if (!meeting) return <div className="p-8 text-center text-gray-400">약속을 찾을 수 없습니다.</div>;
+  if (!meeting) return <div className="p-8 text-center text-text-muted">약속을 찾을 수 없습니다.</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <div className="min-h-screen bg-bg">
+      <header className="bg-white border-b border-border sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600">←</button>
+          <button onClick={() => router.back()} className="text-text-muted hover:text-text-main">
+            <ChevronLeft size={20} strokeWidth={1.5} />
+          </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold text-gray-900 truncate">{meeting.title}</h1>
+            <h1 className="text-lg font-semibold text-text-main truncate">{meeting.title}</h1>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-              meeting.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+              meeting.status === 'CONFIRMED'
+                ? 'bg-mint/20 text-green'
+                : 'bg-amber-50 text-amber-700'
             }`}>
-              {meeting.status === 'CONFIRMED' ? '✓ 확정됨' : '🗳️ 투표 중'}
+              {meeting.status === 'CONFIRMED' ? '✓ 확정됨' : '투표 중'}
             </span>
           </div>
         </div>
@@ -84,18 +89,18 @@ export default function MeetingPage() {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         {/* 닉네임 설정 */}
         {!nicknameSet && meeting.status === 'VOTING' && (
-          <div className="bg-indigo-50 rounded-2xl p-4">
-            <p className="text-sm font-medium text-indigo-700 mb-2">투표하려면 닉네임을 입력하세요</p>
+          <div className="bg-white border border-border rounded-[20px] p-6 shadow-sm">
+            <p className="text-sm font-medium text-text-main mb-2">투표하려면 닉네임을 입력하세요</p>
             <div className="flex gap-2">
               <input
                 placeholder="닉네임"
                 value={nickname}
                 onChange={e => setNickname(e.target.value)}
-                className="flex-1 border border-indigo-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="flex-1 border border-border rounded-[12px] px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint"
               />
               <button
                 onClick={() => nickname.trim() && setNicknameSet(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-xl transition"
+                className="bg-green hover:bg-green-mid text-white text-sm px-4 py-2 rounded-[12px] font-medium"
               >
                 확인
               </button>
@@ -104,9 +109,9 @@ export default function MeetingPage() {
         )}
 
         {nicknameSet && meeting.status === 'VOTING' && (
-          <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-gray-100 text-sm text-gray-500">
-            <span>👤 {nickname}</span>
-            <button onClick={() => setNicknameSet(false)} className="ml-auto text-xs text-gray-400 hover:text-gray-600">변경</button>
+          <div className="flex items-center gap-2 bg-white rounded-[20px] px-4 py-2.5 border border-border shadow-sm text-sm text-text-muted">
+            <span>{nickname}</span>
+            <button onClick={() => setNicknameSet(false)} className="ml-auto text-xs text-text-muted hover:text-text-main font-medium">변경</button>
           </div>
         )}
 
@@ -120,28 +125,28 @@ export default function MeetingPage() {
 
             return (
               <div key={result.placeId}
-                className={`bg-white rounded-2xl p-4 shadow-sm border transition ${
-                  isConfirmed ? 'border-green-400 ring-2 ring-green-200' : 'border-gray-100'
+                className={`bg-white rounded-[20px] p-6 border transition ${
+                  iVoted ? 'ring-1 ring-mint/40 bg-surface/50 border-mint/20' : isConfirmed ? 'border-mint/30' : 'border-border shadow-sm'
                 }`}>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900 truncate">
+                      <h3 className="font-semibold text-text-main truncate">
                         {place?.name || `장소 #${result.placeId}`}
                       </h3>
-                      {isConfirmed && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex-shrink-0">확정!</span>}
+                      {isConfirmed && <span className="text-xs bg-mint/20 text-green px-2 py-0.5 rounded-full flex-shrink-0 font-medium">확정!</span>}
                     </div>
-                    {place?.address && <p className="text-sm text-gray-500 truncate">{place.address}</p>}
+                    {place?.address && <p className="text-sm text-text-muted truncate">{place.address}</p>}
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-2xl font-bold text-indigo-600">{result.voteCount}</p>
-                    <p className="text-xs text-gray-400">표</p>
+                    <p className="text-2xl font-bold text-mint">{result.voteCount}</p>
+                    <p className="text-xs text-text-muted">표</p>
                   </div>
                 </div>
 
                 {/* 득표수 바 */}
-                <div className="h-2 bg-gray-100 rounded-full mb-2 overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                <div className="h-1.5 bg-surface rounded-full mb-2 overflow-hidden">
+                  <div className="h-full bg-mint rounded-full transition-all duration-500"
                     style={{ width: `${pct}%` }} />
                 </div>
 
@@ -149,8 +154,8 @@ export default function MeetingPage() {
                 {result.voters.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
                     {result.voters.map(v => (
-                      <span key={v} className={`text-xs px-2 py-0.5 rounded-full ${
-                        v === nickname ? 'bg-indigo-100 text-indigo-700 font-medium' : 'bg-gray-100 text-gray-500'
+                      <span key={v} className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        v === nickname ? 'bg-mint/20 text-green' : 'bg-surface text-text-muted'
                       }`}>{v}</span>
                     ))}
                   </div>
@@ -162,16 +167,16 @@ export default function MeetingPage() {
                     {nicknameSet && (
                       <button onClick={() => handleVote(result.placeId)}
                         disabled={voting !== null}
-                        className={`flex-1 text-sm py-2 rounded-xl transition ${
+                        className={`flex-1 text-sm py-2 rounded-[12px] font-medium transition ${
                           iVoted
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600'
+                            ? 'bg-green text-white'
+                            : 'bg-surface text-green hover:bg-mint/20'
                         }`}>
                         {voting === result.placeId ? '...' : iVoted ? '✓ 투표함' : '투표'}
                       </button>
                     )}
                     <button onClick={() => handleFinalize(result.placeId)}
-                      className="text-sm px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-xl transition">
+                      className="text-sm px-4 py-2 bg-text-main hover:bg-[#043728] text-white rounded-[12px] font-medium">
                       확정
                     </button>
                   </div>
@@ -182,9 +187,11 @@ export default function MeetingPage() {
         </div>
 
         {meeting.status === 'CONFIRMED' && (
-          <div className="bg-green-50 rounded-2xl p-4 text-center">
-            <p className="text-2xl mb-1">🎉</p>
-            <p className="font-semibold text-green-800">
+          <div className="bg-gradient-to-br from-mint to-green rounded-[20px] p-5 text-center text-white">
+            <div className="flex justify-center mb-2">
+              <Sparkles size={32} strokeWidth={1.5} stroke="white" />
+            </div>
+            <p className="font-bold text-lg">
               {places[meeting.confirmedPlaceId!]?.name || '장소'} 확정!
             </p>
           </div>

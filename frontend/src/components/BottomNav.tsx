@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, MapPin, Users } from 'lucide-react';
+import { Home, Compass, MapPin, Users } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/', label: '홈', Icon: Home },
-  { href: '/places', label: '장소', Icon: MapPin },
+  { href: '/explore', label: '탐색', Icon: Compass },
+  { href: '/places', label: '내장소', Icon: MapPin },
   { href: '/groups', label: '그룹', Icon: Users },
 ];
 

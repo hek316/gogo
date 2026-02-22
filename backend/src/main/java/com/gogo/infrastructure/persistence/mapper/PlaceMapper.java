@@ -15,6 +15,7 @@ public class PlaceMapper {
                 place.getCategory(),
                 place.getUrl(),
                 place.getNote(),
+                place.getImageUrl(),
                 place.getStatus(),
                 place.getCreatedBy(),
                 place.getCreatedAt()
@@ -29,6 +30,7 @@ public class PlaceMapper {
                 entity.getCategory(),
                 entity.getUrl(),
                 entity.getNote(),
+                entity.getImageUrl(),
                 entity.getStatus(),
                 entity.getCreatedBy(),
                 entity.getCreatedAt()

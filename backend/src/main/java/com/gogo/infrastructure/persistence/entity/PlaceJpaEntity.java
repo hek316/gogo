@@ -28,6 +28,9 @@ public class PlaceJpaEntity {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlaceStatus status;
@@ -41,7 +44,7 @@ public class PlaceJpaEntity {
     protected PlaceJpaEntity() {}
 
     public PlaceJpaEntity(Long id, String name, String address, String category,
-                          String url, String note, PlaceStatus status,
+                          String url, String note, String imageUrl, PlaceStatus status,
                           String createdBy, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
@@ -49,6 +52,7 @@ public class PlaceJpaEntity {
         this.category = category;
         this.url = url;
         this.note = note;
+        this.imageUrl = imageUrl;
         this.status = status;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
@@ -60,6 +64,7 @@ public class PlaceJpaEntity {
     public String getCategory() { return category; }
     public String getUrl() { return url; }
     public String getNote() { return note; }
+    public String getImageUrl() { return imageUrl; }
     public PlaceStatus getStatus() { return status; }
     public String getCreatedBy() { return createdBy; }
     public LocalDateTime getCreatedAt() { return createdAt; }

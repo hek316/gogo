@@ -24,6 +24,7 @@ public class AddPlaceUseCase {
                 request.category(),
                 request.url(),
                 request.note(),
+                request.imageUrl(),
                 request.createdBy()
         );
         Place saved = placeRepository.save(place);

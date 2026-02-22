@@ -12,6 +12,7 @@ public record PlaceResponse(
         String category,
         String url,
         String note,
+        String imageUrl,
         PlaceStatus status,
         String createdBy,
         LocalDateTime createdAt
@@ -24,6 +25,7 @@ public record PlaceResponse(
                 place.getCategory(),
                 place.getUrl(),
                 place.getNote(),
+                place.getImageUrl(),
                 place.getStatus(),
                 place.getCreatedBy(),
                 place.getCreatedAt()

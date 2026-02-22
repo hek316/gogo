@@ -42,3 +42,12 @@ body {
   background: rgba(157,141,194,0.3);
   border-radius: 9999px;
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

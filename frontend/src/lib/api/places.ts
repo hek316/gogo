@@ -9,6 +9,7 @@ export interface Place {
   category: string;
   url?: string;
   note?: string;
+  imageUrl?: string;
   status: PlaceStatus;
   createdBy: string;
   createdAt: string;
@@ -20,7 +21,15 @@ export interface AddPlaceRequest {
   category: string;
   url?: string;
   note?: string;
+  imageUrl?: string;
   createdBy: string;
+}
+
+export interface PlacePreview {
+  title: string | null;
+  imageUrl: string | null;
+  address: string | null;
+  description: string | null;
 }
 
 export async function getPlaces(category?: string): Promise<Place[]> {
@@ -49,4 +58,22 @@ export async function markVisited(id: number): Promise<Place> {
 export async function deletePlace(id: number): Promise<void> {
   const res = await fetch(`${API_URL}/api/places/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('장소 삭제에 실패했습니다.');
+}
+
+export async function getPopularPlaces(limit = 10): Promise<Place[]> {
+  const res = await fetch(`${API_URL}/api/places/popular?limit=${limit}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('인기 장소를 불러오지 못했습니다.');
+  return res.json();
+}
+
+export async function getRecentPlaces(limit = 20): Promise<Place[]> {
+  const res = await fetch(`${API_URL}/api/places/recent?limit=${limit}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('최신 장소를 불러오지 못했습니다.');
+  return res.json();
+}
+
+export async function fetchPlacePreview(url: string): Promise<PlacePreview> {
+  const res = await fetch(`${API_URL}/api/places/preview?url=${encodeURIComponent(url)}`);
+  if (!res.ok) return { title: null, imageUrl: null, address: null, description: null };
+  return res.json();
 }

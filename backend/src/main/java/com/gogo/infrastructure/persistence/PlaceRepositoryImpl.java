@@ -3,6 +3,7 @@ package com.gogo.infrastructure.persistence;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.PlaceRepository;
 import com.gogo.infrastructure.persistence.mapper.PlaceMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -46,5 +47,19 @@ public class PlaceRepositoryImpl implements PlaceRepository {
     @Override
     public void deleteById(Long id) {
         placeJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Place> findPopularPlaces(int limit) {
+        return placeJpaRepository.findPopularPlaces(limit).stream()
+                .map(placeMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Place> findRecent(int limit) {
+        return placeJpaRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(0, limit)).stream()
+                .map(placeMapper::toDomain)
+                .toList();
     }
 }

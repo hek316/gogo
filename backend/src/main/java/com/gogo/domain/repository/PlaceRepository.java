@@ -11,4 +11,6 @@ public interface PlaceRepository {
     List<Place> findAll();
     List<Place> findByCategory(String category);
     void deleteById(Long id);
+    List<Place> findPopularPlaces(int limit);
+    List<Place> findRecent(int limit);
 }

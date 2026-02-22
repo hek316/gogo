@@ -10,13 +10,14 @@ public class Place {
     private String category;
     private String url;
     private String note;
+    private String imageUrl;
     private PlaceStatus status;
     private String createdBy;
     private LocalDateTime createdAt;
 
     private Place() {}
 
-    public static Place create(String name, String address, String category, String url, String note, String createdBy) {
+    public static Place create(String name, String address, String category, String url, String note, String imageUrl, String createdBy) {
         validate(name);
         Place place = new Place();
         place.name = name;
@@ -24,6 +25,7 @@ public class Place {
         place.category = category;
         place.url = url;
         place.note = note;
+        place.imageUrl = imageUrl;
         place.status = PlaceStatus.WANT_TO_GO;
         place.createdBy = createdBy;
         place.createdAt = LocalDateTime.now();
@@ -31,7 +33,7 @@ public class Place {
     }
 
     public static Place reconstruct(Long id, String name, String address, String category,
-                                    String url, String note, PlaceStatus status,
+                                    String url, String note, String imageUrl, PlaceStatus status,
                                     String createdBy, LocalDateTime createdAt) {
         Place place = new Place();
         place.id = id;
@@ -40,6 +42,7 @@ public class Place {
         place.category = category;
         place.url = url;
         place.note = note;
+        place.imageUrl = imageUrl;
         place.status = status;
         place.createdBy = createdBy;
         place.createdAt = createdAt;
@@ -62,6 +65,7 @@ public class Place {
     public String getCategory() { return category; }
     public String getUrl() { return url; }
     public String getNote() { return note; }
+    public String getImageUrl() { return imageUrl; }
     public PlaceStatus getStatus() { return status; }
     public String getCreatedBy() { return createdBy; }
     public LocalDateTime getCreatedAt() { return createdAt; }
