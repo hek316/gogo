@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import { AuthProvider } from "@/lib/auth/AuthContext";
 
 export const metadata: Metadata = {
   title: "GoGo - 친구들과 가고 싶은 장소 기록",
@@ -15,10 +16,12 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased bg-bg">
-        <div className="pb-16">
-          {children}
-        </div>
-        <BottomNav />
+        <AuthProvider>
+          <div className="pb-16">
+            {children}
+          </div>
+          <BottomNav />
+        </AuthProvider>
       </body>
     </html>
   );

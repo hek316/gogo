@@ -4,6 +4,5 @@ import jakarta.validation.constraints.NotNull;
 
 public record SharePlaceRequest(
         Long groupId,
-        @NotNull Long placeId,
-        String sharedBy
+        @NotNull Long placeId
 ) {}

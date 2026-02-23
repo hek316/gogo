@@ -11,3 +11,15 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+
+jwt:
+  secret: test-secret-key-for-unit-tests-must-be-32-chars
+
+oauth:
+  kakao:
+    client-id: test-client-id
+    client-secret: test-client-secret
+    redirect-uri: http://localhost:8080/api/auth/kakao/callback
+
+frontend:
+  url: http://localhost:3000

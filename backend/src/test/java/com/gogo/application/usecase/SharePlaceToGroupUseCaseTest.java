@@ -6,12 +6,18 @@ import com.gogo.domain.entity.GroupPlace;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.GroupPlaceRepository;
 import com.gogo.domain.repository.PlaceRepository;
+import com.gogo.infrastructure.security.AuthenticatedUser;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -30,6 +36,18 @@ class SharePlaceToGroupUseCaseTest {
     @InjectMocks
     private SharePlaceToGroupUseCase sharePlaceToGroupUseCase;
 
+    @BeforeEach
+    void setUpSecurityContext() {
+        AuthenticatedUser principal = new AuthenticatedUser(1L, "홍길동");
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList()));
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void 장소_공유_성공() {
         Place place = Place.create("성수동 카페", "서울", "CAFE", null, null, null, "홍길동");
@@ -37,7 +55,7 @@ class SharePlaceToGroupUseCaseTest {
         GroupPlace saved = GroupPlace.create(1L, 1L, "홍길동");
         given(groupPlaceRepository.save(any())).willReturn(saved);
 
-        GroupPlaceResponse response = sharePlaceToGroupUseCase.execute(new SharePlaceRequest(1L, 1L, "홍길동"));
+        GroupPlaceResponse response = sharePlaceToGroupUseCase.execute(new SharePlaceRequest(1L, 1L));
 
         assertThat(response).isNotNull();
     }
@@ -46,7 +64,7 @@ class SharePlaceToGroupUseCaseTest {
     void 존재하지_않는_장소_공유시_예외() {
         given(placeRepository.findById(999L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> sharePlaceToGroupUseCase.execute(new SharePlaceRequest(1L, 999L, "홍길동")))
+        assertThatThrownBy(() -> sharePlaceToGroupUseCase.execute(new SharePlaceRequest(1L, 999L)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("장소");
     }
