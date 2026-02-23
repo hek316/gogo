@@ -18,6 +18,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         List<String> origins = new ArrayList<>();
         origins.add("http://localhost:3000");
+        origins.add("https://gogo-sigma.vercel.app");
         if (frontendUrl != null && !frontendUrl.isBlank()) {
             origins.add(frontendUrl);
         }

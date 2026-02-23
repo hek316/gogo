@@ -12,7 +12,7 @@ async function handler(
 
   const headers = new Headers();
   req.headers.forEach((value, key) => {
-    if (!['host', 'connection', 'transfer-encoding'].includes(key.toLowerCase())) {
+    if (!['host', 'connection', 'transfer-encoding', 'origin'].includes(key.toLowerCase())) {
       headers.set(key, value);
     }
   });
