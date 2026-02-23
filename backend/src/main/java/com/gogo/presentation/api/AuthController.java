@@ -1,10 +1,10 @@
 package com.gogo.presentation.api;
 
+import com.gogo.application.usecase.auth.GetCurrentUserUseCase;
 import com.gogo.application.usecase.auth.KakaoLoginUseCase;
 import com.gogo.application.usecase.auth.LogoutUseCase;
 import com.gogo.application.usecase.auth.RefreshTokenUseCase;
 import com.gogo.domain.entity.User;
-import com.gogo.domain.repository.UserRepository;
 import com.gogo.infrastructure.security.AuthenticatedUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +25,7 @@ public class AuthController {
     private final KakaoLoginUseCase kakaoLoginUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
-    private final UserRepository userRepository;
+    private final GetCurrentUserUseCase getCurrentUserUseCase;
     private final com.gogo.application.auth.KakaoOAuthClient kakaoOAuthClient;
 
     @Value("${frontend.url:http://localhost:3000}")
@@ -35,12 +34,12 @@ public class AuthController {
     public AuthController(KakaoLoginUseCase kakaoLoginUseCase,
                           RefreshTokenUseCase refreshTokenUseCase,
                           LogoutUseCase logoutUseCase,
-                          UserRepository userRepository,
+                          GetCurrentUserUseCase getCurrentUserUseCase,
                           com.gogo.application.auth.KakaoOAuthClient kakaoOAuthClient) {
         this.kakaoLoginUseCase = kakaoLoginUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
         this.logoutUseCase = logoutUseCase;
-        this.userRepository = userRepository;
+        this.getCurrentUserUseCase = getCurrentUserUseCase;
         this.kakaoOAuthClient = kakaoOAuthClient;
     }
 
@@ -54,10 +53,9 @@ public class AuthController {
     public void callback(@RequestParam String code, HttpServletResponse response) throws Exception {
         try {
             KakaoLoginUseCase.TokenPair tokens = kakaoLoginUseCase.execute(code);
-            String redirectUrl = frontendUrl + "/auth/callback"
-                    + "?at=" + tokens.accessToken()
-                    + "&rt=" + tokens.refreshToken();
-            response.sendRedirect(redirectUrl);
+            setAccessTokenCookie(response, tokens.accessToken());
+            setRefreshTokenCookie(response, tokens.refreshToken());
+            response.sendRedirect(frontendUrl + "/");
         } catch (Exception e) {
             response.sendRedirect(frontendUrl + "/auth/error?message=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
         }
@@ -96,7 +94,7 @@ public class AuthController {
         if (principal == null) {
             return ResponseEntity.status(401).body(Map.of("error", "인증이 필요합니다."));
         }
-        Optional<User> user = userRepository.findById(principal.userId());
+        Optional<User> user = getCurrentUserUseCase.execute(principal.userId());
         if (user.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "사용자를 찾을 수 없습니다."));
         }

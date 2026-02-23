@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: ${DDL_AUTO:update}
+      ddl-auto: ${DDL_AUTO:validate}
     show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
@@ -22,7 +22,7 @@ logging:
     org.hibernate.SQL: DEBUG
 
 jwt:
-  secret: ${JWT_SECRET:local-dev-secret-key-must-be-at-least-32-chars}
+  secret: ${JWT_SECRET}
 
 oauth:
   kakao:

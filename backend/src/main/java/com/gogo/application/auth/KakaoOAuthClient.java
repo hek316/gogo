@@ -1,5 +1,6 @@
 package com.gogo.application.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -74,11 +75,11 @@ public class KakaoOAuthClient {
     }
 
     public record KakaoTokenResponse(
-            String access_token,
-            String token_type,
-            String refresh_token,
-            Integer expires_in,
-            Integer refresh_token_expires_in
+            @JsonProperty("access_token") String accessToken,
+            @JsonProperty("token_type") String tokenType,
+            @JsonProperty("refresh_token") String refreshToken,
+            @JsonProperty("expires_in") Integer expiresIn,
+            @JsonProperty("refresh_token_expires_in") Integer refreshTokenExpiresIn
     ) {}
 
     public record KakaoUserInfo(String id, String nickname, String profileImageUrl) {}

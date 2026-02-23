@@ -38,10 +38,12 @@ async function handler(
     'Content-Type': res.headers.get('Content-Type') || 'application/json',
   });
 
-  // Forward Set-Cookie headers from backend
-  const setCookie = res.headers.get('Set-Cookie');
-  if (setCookie) {
-    responseHeaders.set('Set-Cookie', setCookie);
+  // Forward Set-Cookie headers from backend (handle multiple cookies)
+  const setCookies = typeof (res.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie === 'function'
+    ? (res.headers as Headers & { getSetCookie: () => string[] }).getSetCookie()
+    : res.headers.get('set-cookie') ? [res.headers.get('set-cookie')!] : [];
+  for (const cookie of setCookies) {
+    responseHeaders.append('Set-Cookie', cookie);
   }
 
   return new NextResponse(data, {

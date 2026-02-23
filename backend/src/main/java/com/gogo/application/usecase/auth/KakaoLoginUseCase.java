@@ -37,7 +37,7 @@ public class KakaoLoginUseCase {
 
     public TokenPair execute(String code) {
         KakaoOAuthClient.KakaoTokenResponse kakaoTokens = kakaoOAuthClient.exchangeCode(code);
-        KakaoOAuthClient.KakaoUserInfo userInfo = kakaoOAuthClient.getUserInfo(kakaoTokens.access_token());
+        KakaoOAuthClient.KakaoUserInfo userInfo = kakaoOAuthClient.getUserInfo(kakaoTokens.accessToken());
 
         User user = upsertUser(userInfo);
 
