@@ -23,7 +23,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
   const [preview, setPreview] = useState<PlacePreview | null>(null);
   const [autoFilled, setAutoFilled] = useState<{ name?: boolean; address?: boolean }>({});
   const [form, setForm] = useState<AddPlaceRequest & { imageUrl?: string }>({
-    name: '', address: '', category: 'CAFE', url: '', note: '', imageUrl: '', createdBy: '',
+    name: '', address: '', category: 'CAFE', url: '', note: '', imageUrl: '',
   });
 
   const handleUrlBlur = async () => {
@@ -34,7 +34,6 @@ export default function AddPlaceForm({ onAdded }: Props) {
     try {
       const result = await fetchPlacePreview(url);
       setPreview(result);
-      // 자동 적용: 빈 필드에만 채움 (현재 form 값 기준으로 미리 계산)
       const filled: { name?: boolean; address?: boolean } = {};
       if (!form.name && result.title) filled.name = true;
       if (!form.address && result.address) filled.address = true;
@@ -74,7 +73,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
         imageUrl: form.imageUrl || undefined,
       });
       onAdded(place);
-      setForm({ name: '', address: '', category: 'CAFE', url: '', note: '', imageUrl: '', createdBy: '' });
+      setForm({ name: '', address: '', category: 'CAFE', url: '', note: '', imageUrl: '' });
       setPreview(null);
       setOpen(false);
     } catch {
@@ -175,13 +174,6 @@ export default function AddPlaceForm({ onAdded }: Props) {
             onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
             rows={2}
             className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint resize-none bg-white"
-          />
-          <input
-            required
-            placeholder="닉네임 *"
-            value={form.createdBy}
-            onChange={e => setForm(f => ({ ...f, createdBy: e.target.value }))}
-            className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
           />
           <button
             type="submit"

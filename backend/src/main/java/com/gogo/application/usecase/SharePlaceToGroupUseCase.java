@@ -7,6 +7,9 @@ import com.gogo.domain.entity.GroupPlace;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.GroupPlaceRepository;
 import com.gogo.domain.repository.PlaceRepository;
+import com.gogo.infrastructure.security.AuthenticatedUser;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +26,19 @@ public class SharePlaceToGroupUseCase {
     }
 
     public GroupPlaceResponse execute(SharePlaceRequest request) {
+        String sharedBy = extractNickname();
         Place place = placeRepository.findById(request.placeId())
                 .orElseThrow(() -> new IllegalArgumentException("장소를 찾을 수 없습니다. id=" + request.placeId()));
-        GroupPlace groupPlace = GroupPlace.create(request.groupId(), request.placeId(), request.sharedBy());
+        GroupPlace groupPlace = GroupPlace.create(request.groupId(), request.placeId(), sharedBy);
         GroupPlace saved = groupPlaceRepository.save(groupPlace);
         return GroupPlaceResponse.of(saved, PlaceResponse.from(place));
+    }
+
+    private String extractNickname() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
+            return user.nickname();
+        }
+        return "anonymous";
     }
 }

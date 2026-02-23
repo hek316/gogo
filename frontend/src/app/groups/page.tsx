@@ -10,15 +10,15 @@ export default function GroupsPage() {
   const [tab, setTab] = useState<'create' | 'join'>('create');
   const [loading, setLoading] = useState(false);
 
-  const [createForm, setCreateForm] = useState({ name: '', createdBy: '' });
-  const [joinForm, setJoinForm] = useState({ inviteCode: '', nickname: '' });
+  const [createForm, setCreateForm] = useState({ name: '' });
+  const [joinForm, setJoinForm] = useState({ inviteCode: '' });
   const [error, setError] = useState('');
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const group = await createGroup(createForm.name, createForm.createdBy);
+      const group = await createGroup(createForm.name);
       router.push(`/groups/${group.id}`);
     } catch (err: any) {
       setError(err.message);
@@ -31,7 +31,7 @@ export default function GroupsPage() {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const group = await joinGroup(joinForm.inviteCode, joinForm.nickname);
+      const group = await joinGroup(joinForm.inviteCode);
       router.push(`/groups/${group.id}`);
     } catch (err: any) {
       setError(err.message);
@@ -74,14 +74,6 @@ export default function GroupsPage() {
                 className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium text-text-main mb-1.5 block">닉네임</label>
-              <input required placeholder="예) 홍길동"
-                value={createForm.createdBy}
-                onChange={e => setCreateForm(f => ({ ...f, createdBy: e.target.value }))}
-                className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
-              />
-            </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
             <button type="submit" disabled={loading}
               className="w-full disabled:opacity-50 bg-green hover:bg-green-mid text-white rounded-[16px] py-3.5 text-sm font-medium">
@@ -96,14 +88,6 @@ export default function GroupsPage() {
                 value={joinForm.inviteCode}
                 onChange={e => setJoinForm(f => ({ ...f, inviteCode: e.target.value }))}
                 className="w-full border border-border rounded-[12px] px-5 py-3 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-text-main mb-1.5 block">닉네임</label>
-              <input required placeholder="예) 김철수"
-                value={joinForm.nickname}
-                onChange={e => setJoinForm(f => ({ ...f, nickname: e.target.value }))}
-                className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}

@@ -22,13 +22,17 @@ export async function createMeeting(groupId: number, title: string, candidatePla
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title, candidatePlaceIds }),
+    credentials: 'include',
   });
   if (!res.ok) throw new Error('약속 생성에 실패했습니다.');
   return res.json();
 }
 
 export async function getMeeting(groupId: number, meetingId: number): Promise<Meeting> {
-  const res = await fetch(`${API_URL}/api/groups/${groupId}/meetings/${meetingId}`, { cache: 'no-store' });
+  const res = await fetch(`${API_URL}/api/groups/${groupId}/meetings/${meetingId}`, {
+    cache: 'no-store',
+    credentials: 'include',
+  });
   if (!res.ok) throw new Error('약속을 불러오지 못했습니다.');
   return res.json();
 }
@@ -38,6 +42,7 @@ export async function vote(meetingId: number, placeId: number, voterName: string
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ placeId, voterName }),
+    credentials: 'include',
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -51,6 +56,7 @@ export async function finalizeMeeting(meetingId: number, confirmedPlaceId: numbe
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ confirmedPlaceId }),
+    credentials: 'include',
   });
   if (!res.ok) throw new Error('확정에 실패했습니다.');
   return res.json();

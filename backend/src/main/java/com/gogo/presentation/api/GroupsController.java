@@ -49,7 +49,7 @@ public class GroupsController {
     @PostMapping("/{id}/places")
     public ResponseEntity<GroupPlaceResponse> sharePlace(@PathVariable Long id,
                                                          @Valid @RequestBody SharePlaceRequest request) {
-        SharePlaceRequest withGroupId = new SharePlaceRequest(id, request.placeId(), request.sharedBy());
+        SharePlaceRequest withGroupId = new SharePlaceRequest(id, request.placeId());
         return ResponseEntity.status(HttpStatus.CREATED).body(sharePlaceToGroupUseCase.execute(withGroupId));
     }
 

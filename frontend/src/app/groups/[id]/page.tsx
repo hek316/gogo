@@ -22,7 +22,7 @@ export default function GroupDetailPage() {
   const [loading, setLoading] = useState(true);
   const [shareModal, setShareModal] = useState(false);
   const [meetingModal, setMeetingModal] = useState(false);
-  const [shareForm, setShareForm] = useState({ placeId: '', sharedBy: '' });
+  const [shareForm, setShareForm] = useState({ placeId: '' });
   const [meetingForm, setMeetingForm] = useState({ title: '', candidatePlaceIds: [] as number[] });
   const [copied, setCopied] = useState(false);
 
@@ -42,10 +42,10 @@ export default function GroupDetailPage() {
   const handleShare = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const gp = await sharePlaceToGroup(groupId, Number(shareForm.placeId), shareForm.sharedBy);
+      const gp = await sharePlaceToGroup(groupId, Number(shareForm.placeId));
       setGroupPlaces(prev => [...prev, gp]);
       setShareModal(false);
-      setShareForm({ placeId: '', sharedBy: '' });
+      setShareForm({ placeId: '' });
     } catch (err: any) {
       alert(err.message);
     }
@@ -203,11 +203,6 @@ export default function GroupDetailPage() {
                   <option key={p.id} value={p.id}>{CATEGORY_LABEL[p.category]} {p.name}</option>
                 ))}
               </select>
-              <input required placeholder="닉네임"
-                value={shareForm.sharedBy}
-                onChange={e => setShareForm(f => ({ ...f, sharedBy: e.target.value }))}
-                className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
-              />
               <button type="submit"
                 className="w-full bg-green hover:bg-green-mid text-white rounded-[16px] py-3.5 text-sm font-medium">
                 공유하기
