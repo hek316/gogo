@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Compass, MapPin, Users } from 'lucide-react';
+import { Home, Compass, MapPin, Users, User } from 'lucide-react';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 const NAV_ITEMS = [
   { href: '/', label: '홈', Icon: Home },
@@ -13,6 +14,9 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const profileHref = user ? '/profile' : '/auth/login';
+  const profileLabel = user ? user.nickname : '로그인';
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-[#F8F7FB]/90 backdrop-blur-md border-t border-[rgba(45,38,75,0.07)] z-20">
@@ -32,6 +36,27 @@ export default function BottomNav() {
             </Link>
           );
         })}
+        {/* 프로필 / 로그인 탭 */}
+        <Link href={profileHref}
+          className={`flex-1 flex flex-col items-center pt-0.5 pb-3 text-xs transition relative ${
+            pathname.startsWith('/auth') || pathname === '/profile'
+              ? 'text-[#9D8DC2]'
+              : 'text-[rgba(45,38,75,0.35)] hover:text-[#2D264B]'
+          }`}>
+          {(pathname.startsWith('/auth') || pathname === '/profile') && (
+            <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#9D8DC2]" />
+          )}
+          <span className="mb-1 mt-2">
+            {user?.profileImageUrl ? (
+              <img src={user.profileImageUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
+            ) : (
+              <User size={20} strokeWidth={1} />
+            )}
+          </span>
+          <span className={`font-medium tracking-[-0.02em] truncate max-w-[48px] ${pathname.startsWith('/auth') || pathname === '/profile' ? 'text-[#9D8DC2]' : ''}`}>
+            {profileLabel}
+          </span>
+        </Link>
       </div>
     </nav>
   );
