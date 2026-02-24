@@ -1,5 +1,8 @@
 package com.gogo.presentation.api;
 
+import com.gogo.application.auth.GoogleOAuthClient;
+import com.gogo.application.auth.KakaoOAuthClient;
+import com.gogo.application.usecase.auth.GoogleLoginUseCase;
 import com.gogo.application.usecase.auth.KakaoLoginUseCase;
 import com.gogo.application.usecase.auth.LogoutUseCase;
 import com.gogo.application.usecase.auth.RefreshTokenUseCase;
@@ -14,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -24,24 +26,30 @@ import java.util.Optional;
 public class AuthController {
 
     private final KakaoLoginUseCase kakaoLoginUseCase;
+    private final GoogleLoginUseCase googleLoginUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
     private final UserRepository userRepository;
-    private final com.gogo.application.auth.KakaoOAuthClient kakaoOAuthClient;
+    private final KakaoOAuthClient kakaoOAuthClient;
+    private final GoogleOAuthClient googleOAuthClient;
 
     @Value("${frontend.url:http://localhost:3000}")
     private String frontendUrl;
 
     public AuthController(KakaoLoginUseCase kakaoLoginUseCase,
+                          GoogleLoginUseCase googleLoginUseCase,
                           RefreshTokenUseCase refreshTokenUseCase,
                           LogoutUseCase logoutUseCase,
                           UserRepository userRepository,
-                          com.gogo.application.auth.KakaoOAuthClient kakaoOAuthClient) {
+                          KakaoOAuthClient kakaoOAuthClient,
+                          GoogleOAuthClient googleOAuthClient) {
         this.kakaoLoginUseCase = kakaoLoginUseCase;
+        this.googleLoginUseCase = googleLoginUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
         this.logoutUseCase = logoutUseCase;
         this.userRepository = userRepository;
         this.kakaoOAuthClient = kakaoOAuthClient;
+        this.googleOAuthClient = googleOAuthClient;
     }
 
     @GetMapping("/kakao/authorize")
@@ -54,6 +62,25 @@ public class AuthController {
     public void callback(@RequestParam String code, HttpServletResponse response) throws Exception {
         try {
             KakaoLoginUseCase.TokenPair tokens = kakaoLoginUseCase.execute(code);
+            String redirectUrl = frontendUrl + "/auth/callback"
+                    + "?at=" + tokens.accessToken()
+                    + "&rt=" + tokens.refreshToken();
+            response.sendRedirect(redirectUrl);
+        } catch (Exception e) {
+            response.sendRedirect(frontendUrl + "/auth/error?message=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
+        }
+    }
+
+    @GetMapping("/google/authorize")
+    public void googleAuthorize(HttpServletResponse response) throws Exception {
+        String redirectUrl = googleOAuthClient.buildAuthorizationUrl();
+        response.sendRedirect(redirectUrl);
+    }
+
+    @GetMapping("/google/callback")
+    public void googleCallback(@RequestParam String code, HttpServletResponse response) throws Exception {
+        try {
+            KakaoLoginUseCase.TokenPair tokens = googleLoginUseCase.execute(code);
             String redirectUrl = frontendUrl + "/auth/callback"
                     + "?at=" + tokens.accessToken()
                     + "&rt=" + tokens.refreshToken();

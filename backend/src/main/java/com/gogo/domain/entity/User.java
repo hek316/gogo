@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class User {
 
     private Long id;
-    private String kakaoId;
+    private String oauthId;
     private String nickname;
     private String profileImageUrl;
     private OAuthProvider provider;
@@ -13,9 +13,9 @@ public class User {
 
     private User() {}
 
-    public static User create(String kakaoId, String nickname, String profileImageUrl, OAuthProvider provider) {
+    public static User create(String oauthId, String nickname, String profileImageUrl, OAuthProvider provider) {
         User user = new User();
-        user.kakaoId = kakaoId;
+        user.oauthId = oauthId;
         user.nickname = nickname;
         user.profileImageUrl = profileImageUrl;
         user.provider = provider;
@@ -23,11 +23,11 @@ public class User {
         return user;
     }
 
-    public static User reconstruct(Long id, String kakaoId, String nickname, String profileImageUrl,
+    public static User reconstruct(Long id, String oauthId, String nickname, String profileImageUrl,
                                    OAuthProvider provider, LocalDateTime createdAt) {
         User user = new User();
         user.id = id;
-        user.kakaoId = kakaoId;
+        user.oauthId = oauthId;
         user.nickname = nickname;
         user.profileImageUrl = profileImageUrl;
         user.provider = provider;
@@ -41,7 +41,7 @@ public class User {
     }
 
     public Long getId() { return id; }
-    public String getKakaoId() { return kakaoId; }
+    public String getOauthId() { return oauthId; }
     public String getNickname() { return nickname; }
     public String getProfileImageUrl() { return profileImageUrl; }
     public OAuthProvider getProvider() { return provider; }

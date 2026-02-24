@@ -1,7 +1,7 @@
 package com.gogo.application.usecase.auth;
 
+import com.gogo.application.auth.GoogleOAuthClient;
 import com.gogo.application.auth.JwtService;
-import com.gogo.application.auth.KakaoOAuthClient;
 import com.gogo.domain.entity.OAuthProvider;
 import com.gogo.domain.entity.RefreshToken;
 import com.gogo.domain.entity.User;
@@ -16,28 +16,28 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class KakaoLoginUseCase {
+public class GoogleLoginUseCase {
 
     private static final long REFRESH_TOKEN_VALIDITY_DAYS = 7;
 
-    private final KakaoOAuthClient kakaoOAuthClient;
+    private final GoogleOAuthClient googleOAuthClient;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
 
-    public KakaoLoginUseCase(KakaoOAuthClient kakaoOAuthClient,
-                             UserRepository userRepository,
-                             RefreshTokenRepository refreshTokenRepository,
-                             JwtService jwtService) {
-        this.kakaoOAuthClient = kakaoOAuthClient;
+    public GoogleLoginUseCase(GoogleOAuthClient googleOAuthClient,
+                              UserRepository userRepository,
+                              RefreshTokenRepository refreshTokenRepository,
+                              JwtService jwtService) {
+        this.googleOAuthClient = googleOAuthClient;
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtService = jwtService;
     }
 
-    public TokenPair execute(String code) {
-        KakaoOAuthClient.KakaoTokenResponse kakaoTokens = kakaoOAuthClient.exchangeCode(code);
-        KakaoOAuthClient.KakaoUserInfo userInfo = kakaoOAuthClient.getUserInfo(kakaoTokens.access_token());
+    public KakaoLoginUseCase.TokenPair execute(String code) {
+        GoogleOAuthClient.GoogleTokenResponse googleTokens = googleOAuthClient.exchangeCode(code);
+        GoogleOAuthClient.GoogleUserInfo userInfo = googleOAuthClient.getUserInfo(googleTokens.access_token());
 
         User user = upsertUser(userInfo);
 
@@ -51,12 +51,12 @@ public class KakaoLoginUseCase {
         );
         refreshTokenRepository.save(refreshToken);
 
-        return new TokenPair(accessToken, rawRefreshToken);
+        return new KakaoLoginUseCase.TokenPair(accessToken, rawRefreshToken);
     }
 
-    private User upsertUser(KakaoOAuthClient.KakaoUserInfo userInfo) {
+    private User upsertUser(GoogleOAuthClient.GoogleUserInfo userInfo) {
         Optional<User> existing = userRepository.findByOauthIdAndProvider(
-                userInfo.id(), OAuthProvider.KAKAO);
+                userInfo.id(), OAuthProvider.GOOGLE);
 
         if (existing.isPresent()) {
             User user = existing.get();
@@ -65,9 +65,7 @@ public class KakaoLoginUseCase {
         }
 
         User newUser = User.create(userInfo.id(), userInfo.nickname(),
-                userInfo.profileImageUrl(), OAuthProvider.KAKAO);
+                userInfo.profileImageUrl(), OAuthProvider.GOOGLE);
         return userRepository.save(newUser);
     }
-
-    public record TokenPair(String accessToken, String refreshToken) {}
 }

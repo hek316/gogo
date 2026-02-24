@@ -16,7 +16,7 @@ public class UserJpaEntity {
     private Long id;
 
     @Column(name = "kakao_id", nullable = false)
-    private String kakaoId;
+    private String oauthId;
 
     @Column(nullable = false)
     private String nickname;
@@ -36,7 +36,7 @@ public class UserJpaEntity {
     public static UserJpaEntity from(User user) {
         UserJpaEntity e = new UserJpaEntity();
         e.id = user.getId();
-        e.kakaoId = user.getKakaoId();
+        e.oauthId = user.getOauthId();
         e.nickname = user.getNickname();
         e.profileImageUrl = user.getProfileImageUrl();
         e.provider = user.getProvider();
@@ -45,11 +45,11 @@ public class UserJpaEntity {
     }
 
     public User toDomain() {
-        return User.reconstruct(id, kakaoId, nickname, profileImageUrl, provider, createdAt);
+        return User.reconstruct(id, oauthId, nickname, profileImageUrl, provider, createdAt);
     }
 
     public Long getId() { return id; }
-    public String getKakaoId() { return kakaoId; }
+    public String getOauthId() { return oauthId; }
     public String getNickname() { return nickname; }
     public String getProfileImageUrl() { return profileImageUrl; }
     public OAuthProvider getProvider() { return provider; }

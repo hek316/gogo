@@ -29,8 +29,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> findByKakaoIdAndProvider(String kakaoId, OAuthProvider provider) {
-        return jpaRepository.findByKakaoIdAndProvider(kakaoId, provider)
+    public Optional<User> findByOauthIdAndProvider(String oauthId, OAuthProvider provider) {
+        return jpaRepository.findByOauthIdAndProvider(oauthId, provider)
                 .map(UserJpaEntity::toDomain);
     }
 }

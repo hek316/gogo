@@ -13,6 +13,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   loginWithKakao: () => void;
+  loginWithGoogle: () => void;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -46,6 +47,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = `${API_BASE}/api/auth/kakao/authorize`;
   };
 
+  const loginWithGoogle = () => {
+    window.location.href = `${API_BASE}/api/auth/google/authorize`;
+  };
+
   const logout = async () => {
     await fetch(`${API_BASE}/api/auth/logout`, {
       method: 'POST',
@@ -55,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithKakao, logout, refresh: fetchMe }}>
+    <AuthContext.Provider value={{ user, loading, loginWithKakao, loginWithGoogle, logout, refresh: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );

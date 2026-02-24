@@ -20,6 +20,10 @@ oauth:
     client-id: test-client-id
     client-secret: test-client-secret
     redirect-uri: http://localhost:8080/api/auth/kakao/callback
+  google:
+    client-id: test-google-client-id
+    client-secret: test-google-client-secret
+    redirect-uri: http://localhost:8080/api/auth/google/callback
 
 frontend:
   url: http://localhost:3000
