@@ -43,12 +43,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchMe();
   }, []);
 
+  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
   const loginWithKakao = () => {
-    window.location.href = `${API_BASE}/api/auth/kakao/authorize`;
+    window.location.href = `${BACKEND_URL}/api/auth/kakao/authorize`;
   };
 
   const loginWithGoogle = () => {
-    window.location.href = `${API_BASE}/api/auth/google/authorize`;
+    window.location.href = `${BACKEND_URL}/api/auth/google/authorize`;
   };
 
   const logout = async () => {
