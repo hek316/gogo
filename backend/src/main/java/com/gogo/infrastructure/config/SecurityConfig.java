@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/places/popular", "/api/places/recent", "/api/places/preview").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/**").permitAll()
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
