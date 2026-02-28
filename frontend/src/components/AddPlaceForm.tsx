@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { addPlace, fetchPlacePreview, AddPlaceRequest, Place, PlacePreview } from '@/lib/api/places';
-import { Loader2, ImageIcon, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { addPlace, fetchPlacePreview, searchPlaces, AddPlaceRequest, Place, PlacePreview, PlaceSearchResult } from '@/lib/api/places';
+import { useAuth } from '@/lib/auth/AuthContext';
+import { Loader2, ImageIcon, CheckCircle2, Search } from 'lucide-react';
 
 const CATEGORIES = [
   { value: 'CAFE', label: '카페' },
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function AddPlaceForm({ onAdded }: Props) {
+  const { user, loginWithKakao } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -25,6 +27,76 @@ export default function AddPlaceForm({ onAdded }: Props) {
   const [form, setForm] = useState<AddPlaceRequest & { imageUrl?: string }>({
     name: '', address: '', category: 'CAFE', url: '', note: '', imageUrl: '',
   });
+
+  // 자동완성 상태
+  const [searchResults, setSearchResults] = useState<PlaceSearchResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleNameChange = useCallback((value: string) => {
+    setForm(f => ({ ...f, name: value }));
+    setAutoFilled(f => ({ ...f, name: false }));
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!value.trim()) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const results = await searchPlaces(value);
+        setSearchResults(results);
+        setShowDropdown(results.length > 0);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+  }, []);
+
+  const handleSelectPlace = async (result: PlaceSearchResult) => {
+    setShowDropdown(false);
+    setSearchResults([]);
+    setForm(f => ({
+      ...f,
+      name: result.name,
+      address: result.address || f.address,
+      url: result.mapUrl || f.url,
+    }));
+    setAutoFilled({ name: true, address: !!result.address });
+    setTimeout(() => setAutoFilled({}), 1500);
+
+    // place_url로 og:image 추출 시도
+    if (result.mapUrl) {
+      setPreviewLoading(true);
+      try {
+        const prev = await fetchPlacePreview(result.mapUrl);
+        if (prev.imageUrl) {
+          setForm(f => ({ ...f, imageUrl: prev.imageUrl || f.imageUrl }));
+          setPreview(prev);
+        }
+      } finally {
+        setPreviewLoading(false);
+      }
+    }
+  };
 
   const handleUrlBlur = async () => {
     const url = form.url?.trim();
@@ -75,6 +147,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
       onAdded(place);
       setForm({ name: '', address: '', category: 'CAFE', url: '', note: '', imageUrl: '' });
       setPreview(null);
+      setSearchResults([]);
       setOpen(false);
     } catch {
       alert('장소 추가에 실패했습니다.');
@@ -83,10 +156,20 @@ export default function AddPlaceForm({ onAdded }: Props) {
     }
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    setPreview(null);
+    setSearchResults([]);
+    setShowDropdown(false);
+  };
+
   if (!open) {
     return (
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          if (!user) { loginWithKakao(); return; }
+          setOpen(true);
+        }}
         className="fixed bottom-20 right-5 bg-mint hover:bg-green text-white rounded-full w-14 h-14 text-2xl flex items-center justify-center font-bold shadow-[0_4px_20px_rgba(0,212,170,0.45)] hover:scale-[1.02] transition-all duration-150"
       >
         +
@@ -99,7 +182,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
       <div className="bg-[#F0FDF9] w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-lg border-t border-border max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-lg font-semibold text-text-main">장소 추가</h2>
-          <button onClick={() => { setOpen(false); setPreview(null); }}
+          <button onClick={handleClose}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-surface text-green hover:bg-[#A7F3D0] text-sm font-bold">
             ✕
           </button>
@@ -148,13 +231,47 @@ export default function AddPlaceForm({ onAdded }: Props) {
             )}
           </div>
 
-          <input
-            required
-            placeholder="장소 이름 *"
-            value={form.name}
-            onChange={e => { setAutoFilled(f => ({ ...f, name: false })); setForm(f => ({ ...f, name: e.target.value })); }}
-            className={`w-full border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint transition-colors duration-300 ${autoFilled.name ? 'bg-mint/10 border-mint' : 'bg-white border-border'}`}
-          />
+          {/* 이름 — 자동완성 검색 */}
+          <div className="relative" ref={dropdownRef}>
+            <div className="relative">
+              <input
+                ref={nameInputRef}
+                required
+                placeholder="장소 이름 검색 *"
+                value={form.name}
+                onChange={e => handleNameChange(e.target.value)}
+                onFocus={() => { if (searchResults.length > 0) setShowDropdown(true); }}
+                className={`w-full border rounded-[12px] px-5 py-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint transition-colors duration-300 ${autoFilled.name ? 'bg-mint/10 border-mint' : 'bg-white border-border'}`}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
+                {searchLoading
+                  ? <Loader2 size={15} className="animate-spin" />
+                  : <Search size={15} />
+                }
+              </div>
+            </div>
+            {showDropdown && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-border rounded-[12px] shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                {searchResults.map((result, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onMouseDown={() => handleSelectPlace(result)}
+                    className="w-full text-left px-4 py-3 hover:bg-[#F0FDF9] transition-colors border-b border-border last:border-0"
+                  >
+                    <p className="text-sm font-medium text-text-main line-clamp-1">{result.name}</p>
+                    {result.address && (
+                      <p className="text-xs text-text-muted mt-0.5 line-clamp-1">{result.address}</p>
+                    )}
+                    {result.category && (
+                      <p className="text-xs text-mint mt-0.5">{result.category}</p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <input
             placeholder="주소"
             value={form.address}
@@ -184,7 +301,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
           </button>
           <button
             type="button"
-            onClick={() => { setOpen(false); setPreview(null); }}
+            onClick={handleClose}
             className="w-full bg-surface text-text-muted rounded-[16px] py-3 text-sm font-medium"
           >
             취소

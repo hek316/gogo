@@ -16,6 +16,9 @@ services:
       DDL_AUTO: ${DDL_AUTO:-validate}    # 프로덕션은 validate (update 금지)
       # JWT
       JWT_SECRET: ${JWT_SECRET}
+      # Naver
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
       # OAuth - Kakao
       KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
       KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}

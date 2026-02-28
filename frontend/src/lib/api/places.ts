@@ -31,6 +31,14 @@ export interface PlacePreview {
   description: string | null;
 }
 
+export interface PlaceSearchResult {
+  name: string;
+  address: string | null;
+  mapUrl: string | null;
+  category: string | null;
+  phone: string | null;
+}
+
 export async function getPlaces(category?: string): Promise<Place[]> {
   const params = category ? `?category=${category}` : '';
   const res = await fetch(`${API_URL}/api/places${params}`, { cache: 'no-store', credentials: 'include' });
@@ -81,5 +89,14 @@ export async function getRecentPlaces(limit = 20): Promise<Place[]> {
 export async function fetchPlacePreview(url: string): Promise<PlacePreview> {
   const res = await fetch(`${API_URL}/api/places/preview?url=${encodeURIComponent(url)}`);
   if (!res.ok) return { title: null, imageUrl: null, address: null, description: null };
+  return res.json();
+}
+
+export async function searchPlaces(keyword: string): Promise<PlaceSearchResult[]> {
+  if (!keyword.trim()) return [];
+  const res = await fetch(`${API_URL}/api/places/search?keyword=${encodeURIComponent(keyword)}`, {
+    credentials: 'include',
+  });
+  if (!res.ok) return [];
   return res.json();
 }

@@ -3,6 +3,7 @@ package com.gogo.presentation.api;
 import com.gogo.application.dto.AddPlaceRequest;
 import com.gogo.application.dto.PlacePreviewResponse;
 import com.gogo.application.dto.PlaceResponse;
+import com.gogo.application.dto.PlaceSearchResult;
 import com.gogo.application.usecase.*;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ public class PlacesController {
     private final GetPopularPlacesUseCase getPopularPlacesUseCase;
     private final GetRecentPlacesUseCase getRecentPlacesUseCase;
     private final FetchPlacePreviewUseCase fetchPlacePreviewUseCase;
+    private final SearchPlacesUseCase searchPlacesUseCase;
 
     public PlacesController(AddPlaceUseCase addPlaceUseCase,
                             GetPlacesUseCase getPlacesUseCase,
@@ -31,7 +33,8 @@ public class PlacesController {
                             MarkPlaceVisitedUseCase markPlaceVisitedUseCase,
                             GetPopularPlacesUseCase getPopularPlacesUseCase,
                             GetRecentPlacesUseCase getRecentPlacesUseCase,
-                            FetchPlacePreviewUseCase fetchPlacePreviewUseCase) {
+                            FetchPlacePreviewUseCase fetchPlacePreviewUseCase,
+                            SearchPlacesUseCase searchPlacesUseCase) {
         this.addPlaceUseCase = addPlaceUseCase;
         this.getPlacesUseCase = getPlacesUseCase;
         this.getPlaceUseCase = getPlaceUseCase;
@@ -40,6 +43,7 @@ public class PlacesController {
         this.getPopularPlacesUseCase = getPopularPlacesUseCase;
         this.getRecentPlacesUseCase = getRecentPlacesUseCase;
         this.fetchPlacePreviewUseCase = fetchPlacePreviewUseCase;
+        this.searchPlacesUseCase = searchPlacesUseCase;
     }
 
     @PostMapping
@@ -83,5 +87,10 @@ public class PlacesController {
     @GetMapping("/preview")
     public ResponseEntity<PlacePreviewResponse> previewPlace(@RequestParam String url) {
         return ResponseEntity.ok(fetchPlacePreviewUseCase.execute(url));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PlaceSearchResult>> searchPlaces(@RequestParam String keyword) {
+        return ResponseEntity.ok(searchPlacesUseCase.execute(keyword));
     }
 }
