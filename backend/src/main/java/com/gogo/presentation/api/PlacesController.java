@@ -8,6 +8,8 @@ import com.gogo.application.usecase.*;
 import com.gogo.application.usecase.LikePlaceUseCase;
 import com.gogo.application.usecase.UnlikePlaceUseCase;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/places")
 public class PlacesController {
+    private static final Logger log = LoggerFactory.getLogger(PlacesController.class);
 
     private final AddPlaceUseCase addPlaceUseCase;
     private final GetPlacesUseCase getPlacesUseCase;
@@ -99,6 +102,7 @@ public class PlacesController {
 
     @GetMapping("/search")
     public ResponseEntity<List<PlaceSearchResult>> searchPlaces(@RequestParam String keyword) {
+        log.info("GET /api/places/search called. keyword='{}'", keyword);
         return ResponseEntity.ok(searchPlacesUseCase.execute(keyword));
     }
 

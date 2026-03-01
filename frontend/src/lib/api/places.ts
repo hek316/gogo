@@ -99,7 +99,11 @@ export async function searchPlaces(keyword: string): Promise<PlaceSearchResult[]
   const res = await fetch(`${API_URL}/api/places/search?keyword=${encodeURIComponent(keyword)}`, {
     credentials: 'include',
   });
-  if (!res.ok) return [];
+  if (!res.ok) {
+    const body = await res.text().catch(() => '(unreadable)');
+    console.error(`[searchPlaces] ${res.status} ${res.statusText} - keyword: ${keyword} - body: ${body}`);
+    return [];
+  }
   return res.json();
 }
 
