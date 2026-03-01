@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class NaverLocalApiClient {
@@ -37,26 +38,29 @@ public class NaverLocalApiClient {
             return List.of();
         }
 
-        NaverSearchResponse response;
         try {
-            response = restClient.get()
+            NaverSearchResponse response = restClient.get()
                     .uri(NAVER_LOCAL_API + "?query={keyword}&display=5", keyword)
                     .header("X-Naver-Client-Id", clientId)
                     .header("X-Naver-Client-Secret", clientSecret)
                     .retrieve()
                     .body(NaverSearchResponse.class);
+
+            if (response == null || response.items() == null) {
+                return List.of();
+            }
+
+            return response.items().stream()
+                    .filter(Objects::nonNull)
+                    .map(this::toSearchResult)
+                    .toList();
         } catch (RestClientException e) {
             log.error("Naver API call failed for keyword '{}': {}", keyword, e.getMessage());
             return List.of();
-        }
-
-        if (response == null || response.items() == null) {
+        } catch (RuntimeException e) {
+            log.error("Failed to parse Naver API response for keyword '{}': {}", keyword, e.getMessage(), e);
             return List.of();
         }
-
-        return response.items().stream()
-                .map(this::toSearchResult)
-                .toList();
     }
 
     private PlaceSearchResult toSearchResult(NaverLocalApiItem item) {
