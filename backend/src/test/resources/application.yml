@@ -25,5 +25,9 @@ oauth:
     client-secret: test-google-client-secret
     redirect-uri: http://localhost:8080/api/auth/google/callback
 
+naver:
+  client-id: test-naver-client-id
+  client-secret: test-naver-client-secret
+
 frontend:
   url: http://localhost:3000
