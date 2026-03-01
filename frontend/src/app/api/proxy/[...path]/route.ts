@@ -15,8 +15,9 @@ async function handler(
   const accessToken = cookieStore.get('access-token')?.value;
 
   const headers = new Headers();
+  const EXCLUDED = ['host', 'connection', 'transfer-encoding', 'origin', 'content-length'];
   req.headers.forEach((value, key) => {
-    if (!['host', 'connection', 'transfer-encoding', 'origin'].includes(key.toLowerCase())) {
+    if (!EXCLUDED.includes(key.toLowerCase())) {
       headers.set(key, value);
     }
   });
@@ -31,23 +32,31 @@ async function handler(
     init.body = await req.arrayBuffer();
   }
 
-  const res = await fetch(url, init);
-  const data = await res.arrayBuffer();
+  try {
+    const res = await fetch(url, init);
+    const data = await res.arrayBuffer();
 
-  const responseHeaders = new Headers({
-    'Content-Type': res.headers.get('Content-Type') || 'application/json',
-  });
+    const responseHeaders = new Headers({
+      'Content-Type': res.headers.get('Content-Type') || 'application/json',
+    });
 
-  // Forward Set-Cookie headers from backend
-  const setCookie = res.headers.get('Set-Cookie');
-  if (setCookie) {
-    responseHeaders.set('Set-Cookie', setCookie);
+    // Forward Set-Cookie headers from backend
+    const setCookie = res.headers.get('Set-Cookie');
+    if (setCookie) {
+      responseHeaders.set('Set-Cookie', setCookie);
+    }
+
+    return new NextResponse(data, {
+      status: res.status,
+      headers: responseHeaders,
+    });
+  } catch (error) {
+    console.error(`[Proxy] fetch failed: ${url}`, error);
+    return NextResponse.json(
+      { error: 'Backend unreachable', detail: String(error) },
+      { status: 503 }
+    );
   }
-
-  return new NextResponse(data, {
-    status: res.status,
-    headers: responseHeaders,
-  });
 }
 
 export const GET = handler;
