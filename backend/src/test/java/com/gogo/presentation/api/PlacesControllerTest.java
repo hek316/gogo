@@ -9,7 +9,10 @@ import com.gogo.application.usecase.GetPlaceUseCase;
 import com.gogo.application.usecase.GetPlacesUseCase;
 import com.gogo.application.usecase.GetPopularPlacesUseCase;
 import com.gogo.application.usecase.GetRecentPlacesUseCase;
+import com.gogo.application.usecase.LikePlaceUseCase;
 import com.gogo.application.usecase.MarkPlaceVisitedUseCase;
+import com.gogo.application.usecase.SearchPlacesUseCase;
+import com.gogo.application.usecase.UnlikePlaceUseCase;
 import com.gogo.domain.entity.PlaceStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +65,15 @@ class PlacesControllerTest {
 
     @MockitoBean
     private FetchPlacePreviewUseCase fetchPlacePreviewUseCase;
+
+    @MockitoBean
+    private SearchPlacesUseCase searchPlacesUseCase;
+
+    @MockitoBean
+    private LikePlaceUseCase likePlaceUseCase;
+
+    @MockitoBean
+    private UnlikePlaceUseCase unlikePlaceUseCase;
 
     @Test
     @WithMockUser
