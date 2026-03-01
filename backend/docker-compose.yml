@@ -4,7 +4,7 @@ services:
     image: 207567788967.dkr.ecr.ap-northeast-2.amazonaws.com/gogo-server:latest
     ports:
       - "80:8080"
-    restart: "no"
+    restart: unless-stopped
     env_file:
       - .env                       # 로컬 개발용 .env 자동 로드
     environment:
