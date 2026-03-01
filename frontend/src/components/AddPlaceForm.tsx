@@ -189,59 +189,21 @@ export default function AddPlaceForm({ onAdded }: Props) {
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
 
-          {/* URL with preview */}
-          <div className="space-y-2">
-            <input
-              placeholder="네이버/카카오 지도 URL (선택)"
-              value={form.url}
-              onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
-              onBlur={handleUrlBlur}
-              className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
-            />
-            {previewLoading && (
-              <div className="flex items-center gap-2 px-1 text-xs text-text-muted">
-                <Loader2 size={13} className="animate-spin" />
-                미리보기 불러오는 중...
-              </div>
-            )}
-            {preview && (preview.title || preview.imageUrl) && (
-              <div className="bg-white rounded-[16px] border border-border overflow-hidden">
-                {preview.imageUrl && (
-                  <img src={preview.imageUrl} alt="" className="w-full h-32 object-cover" />
-                )}
-                {!preview.imageUrl && (
-                  <div className="w-full h-20 bg-surface flex items-center justify-center">
-                    <ImageIcon size={24} className="text-text-muted" />
-                  </div>
-                )}
-                <div className="px-4 py-3">
-                  {preview.title && <p className="text-sm font-semibold text-text-main line-clamp-1">{preview.title}</p>}
-                  {preview.address && <p className="text-xs text-text-muted mt-0.5">{preview.address}</p>}
-                  {preview.description && <p className="text-xs text-text-muted mt-1 line-clamp-2">{preview.description}</p>}
-                  <button
-                    type="button"
-                    onClick={applyPreview}
-                    className="mt-2 flex items-center gap-1.5 text-xs text-green font-semibold hover:underline"
-                  >
-                    <CheckCircle2 size={13} />
-                    {(form.name || form.address) ? '정보 업데이트' : '이 정보로 채우기'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 이름 — 자동완성 검색 */}
+          {/* ① 장소 이름 검색 — HERO */}
           <div className="relative" ref={dropdownRef}>
+            <div className="mb-1">
+              <span className="text-xs font-medium text-text-muted">장소 이름</span>
+              <span className="ml-1 text-xs text-mint font-semibold">필수</span>
+            </div>
             <div className="relative">
               <input
                 ref={nameInputRef}
                 required
-                placeholder="장소 이름 검색 *"
+                placeholder="어떤 장소를 추가할까요?"
                 value={form.name}
                 onChange={e => handleNameChange(e.target.value)}
                 onFocus={() => { if (searchResults.length > 0) setShowDropdown(true); }}
-                className={`w-full border rounded-[12px] px-5 py-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint transition-colors duration-300 ${autoFilled.name ? 'bg-mint/10 border-mint' : 'bg-white border-border'}`}
+                className={`w-full border-2 rounded-[12px] px-5 py-4 pr-10 text-base focus:outline-none focus:border-mint transition-colors duration-300 ${autoFilled.name ? 'bg-mint/10 border-mint' : 'bg-white border-border'}`}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
                 {searchLoading
@@ -272,6 +234,41 @@ export default function AddPlaceForm({ onAdded }: Props) {
             )}
           </div>
 
+          {/* ② 프리뷰 카드 */}
+          {previewLoading && (
+            <div className="flex items-center gap-2 px-1 text-xs text-text-muted">
+              <Loader2 size={13} className="animate-spin" />
+              미리보기 불러오는 중...
+            </div>
+          )}
+          {preview && (preview.title || preview.imageUrl) && (
+            <div className="bg-white rounded-[16px] border border-border overflow-hidden">
+              {preview.imageUrl && (
+                <img src={preview.imageUrl} alt="" className="w-full h-32 object-cover" />
+              )}
+              {!preview.imageUrl && (
+                <div className="w-full h-20 bg-surface flex items-center justify-center">
+                  <ImageIcon size={24} className="text-text-muted" />
+                </div>
+              )}
+              <div className="px-4 py-3">
+                {preview.title && <p className="text-sm font-semibold text-text-main line-clamp-1">{preview.title}</p>}
+                {preview.address && <p className="text-xs text-text-muted mt-0.5">{preview.address}</p>}
+                {preview.description && <p className="text-xs text-text-muted mt-1 line-clamp-2">{preview.description}</p>}
+                <button
+                  type="button"
+                  onClick={applyPreview}
+                  className="mt-2 flex items-center gap-1.5 text-xs text-green font-semibold hover:underline"
+                >
+                  <CheckCircle2 size={13} />
+                  {(form.name || form.address) ? '정보 업데이트' : '이 정보로 채우기'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ③ 장소 정보 섹션 */}
+          <p className="text-xs font-medium text-text-muted mt-1">장소 정보</p>
           <input
             placeholder="주소"
             value={form.address}
@@ -285,6 +282,22 @@ export default function AddPlaceForm({ onAdded }: Props) {
           >
             {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
+
+          {/* ④ URL 섹션 */}
+          <div className="flex items-center gap-3 my-1">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-text-muted whitespace-nowrap">또는 URL로 가져오기</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <input
+            placeholder="네이버/카카오 지도 URL 붙여넣기"
+            value={form.url}
+            onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
+            onBlur={handleUrlBlur}
+            className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-mint focus:border-mint bg-white"
+          />
+
+          {/* ⑤ 메모 */}
           <textarea
             placeholder="메모 (선택)"
             value={form.note}
