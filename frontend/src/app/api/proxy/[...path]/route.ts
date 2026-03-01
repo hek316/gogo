@@ -7,40 +7,43 @@ async function handler(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const { path } = await params;
-  const search = req.nextUrl.search;
-  const url = `${BACKEND_URL}/${path.join('/')}${search}`;
-
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get('access-token')?.value;
-
-  const headers = new Headers();
-  const EXCLUDED = ['host', 'connection', 'transfer-encoding', 'origin', 'content-length'];
-  req.headers.forEach((value, key) => {
-    if (!EXCLUDED.includes(key.toLowerCase())) {
-      headers.set(key, value);
-    }
-  });
-
-  if (accessToken) {
-    headers.set('Authorization', `Bearer ${accessToken}`);
-  }
-
-  const init: RequestInit = { method: req.method, headers };
-
-  if (!['GET', 'HEAD'].includes(req.method)) {
-    init.body = await req.arrayBuffer();
-  }
-
   try {
+    const { path } = await params;
+    const search = req.nextUrl.search;
+    const url = `${BACKEND_URL}/${path.join('/')}${search}`;
+
+    console.log(`[Proxy] ${req.method} ${url} (BACKEND_URL=${BACKEND_URL})`);
+
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access-token')?.value;
+
+    const headers = new Headers();
+    const EXCLUDED = ['host', 'connection', 'transfer-encoding', 'origin', 'content-length'];
+    req.headers.forEach((value, key) => {
+      if (!EXCLUDED.includes(key.toLowerCase())) {
+        headers.set(key, value);
+      }
+    });
+
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`);
+    }
+
+    const init: RequestInit = { method: req.method, headers };
+
+    if (!['GET', 'HEAD'].includes(req.method)) {
+      init.body = await req.arrayBuffer();
+    }
+
     const res = await fetch(url, init);
+    console.log(`[Proxy] response status: ${res.status}`);
+
     const data = await res.arrayBuffer();
 
     const responseHeaders = new Headers({
       'Content-Type': res.headers.get('Content-Type') || 'application/json',
     });
 
-    // Forward Set-Cookie headers from backend
     const setCookie = res.headers.get('Set-Cookie');
     if (setCookie) {
       responseHeaders.set('Set-Cookie', setCookie);
@@ -51,9 +54,9 @@ async function handler(
       headers: responseHeaders,
     });
   } catch (error) {
-    console.error(`[Proxy] fetch failed: ${url}`, error);
+    console.error(`[Proxy] ERROR`, error);
     return NextResponse.json(
-      { error: 'Backend unreachable', detail: String(error) },
+      { error: 'Proxy error', detail: String(error) },
       { status: 503 }
     );
   }
