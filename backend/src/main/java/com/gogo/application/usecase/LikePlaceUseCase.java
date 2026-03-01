@@ -1,9 +1,7 @@
 package com.gogo.application.usecase;
 
-import com.gogo.application.dto.PlaceResponse;
-import com.gogo.domain.entity.Place;
+import com.gogo.domain.entity.PlaceLike;
 import com.gogo.domain.repository.PlaceLikeRepository;
-import com.gogo.domain.repository.PlaceRepository;
 import com.gogo.infrastructure.security.AuthenticatedUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,24 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
-public class GetPlaceUseCase {
+@Transactional
+public class LikePlaceUseCase {
 
-    private final PlaceRepository placeRepository;
     private final PlaceLikeRepository placeLikeRepository;
 
-    public GetPlaceUseCase(PlaceRepository placeRepository, PlaceLikeRepository placeLikeRepository) {
-        this.placeRepository = placeRepository;
+    public LikePlaceUseCase(PlaceLikeRepository placeLikeRepository) {
         this.placeLikeRepository = placeLikeRepository;
     }
 
-    public PlaceResponse execute(Long id) {
-        Place place = placeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("장소를 찾을 수 없습니다. id=" + id));
+    public void execute(Long placeId) {
         Long userId = extractUserId();
-        return PlaceResponse.from(place,
-                placeLikeRepository.countByPlaceId(id),
-                userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, id));
+        if (!placeLikeRepository.existsByUserIdAndPlaceId(userId, placeId)) {
+            placeLikeRepository.save(PlaceLike.create(userId, placeId));
+        }
     }
 
     private Long extractUserId() {
@@ -36,6 +30,6 @@ public class GetPlaceUseCase {
         if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
             return user.userId();
         }
-        return null;
+        throw new IllegalStateException("인증 정보가 없습니다.");
     }
 }

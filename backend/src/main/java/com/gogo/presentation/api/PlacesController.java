@@ -5,6 +5,8 @@ import com.gogo.application.dto.PlacePreviewResponse;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.dto.PlaceSearchResult;
 import com.gogo.application.usecase.*;
+import com.gogo.application.usecase.LikePlaceUseCase;
+import com.gogo.application.usecase.UnlikePlaceUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,8 @@ public class PlacesController {
     private final GetRecentPlacesUseCase getRecentPlacesUseCase;
     private final FetchPlacePreviewUseCase fetchPlacePreviewUseCase;
     private final SearchPlacesUseCase searchPlacesUseCase;
+    private final LikePlaceUseCase likePlaceUseCase;
+    private final UnlikePlaceUseCase unlikePlaceUseCase;
 
     public PlacesController(AddPlaceUseCase addPlaceUseCase,
                             GetPlacesUseCase getPlacesUseCase,
@@ -34,7 +38,9 @@ public class PlacesController {
                             GetPopularPlacesUseCase getPopularPlacesUseCase,
                             GetRecentPlacesUseCase getRecentPlacesUseCase,
                             FetchPlacePreviewUseCase fetchPlacePreviewUseCase,
-                            SearchPlacesUseCase searchPlacesUseCase) {
+                            SearchPlacesUseCase searchPlacesUseCase,
+                            LikePlaceUseCase likePlaceUseCase,
+                            UnlikePlaceUseCase unlikePlaceUseCase) {
         this.addPlaceUseCase = addPlaceUseCase;
         this.getPlacesUseCase = getPlacesUseCase;
         this.getPlaceUseCase = getPlaceUseCase;
@@ -44,6 +50,8 @@ public class PlacesController {
         this.getRecentPlacesUseCase = getRecentPlacesUseCase;
         this.fetchPlacePreviewUseCase = fetchPlacePreviewUseCase;
         this.searchPlacesUseCase = searchPlacesUseCase;
+        this.likePlaceUseCase = likePlaceUseCase;
+        this.unlikePlaceUseCase = unlikePlaceUseCase;
     }
 
     @PostMapping
@@ -92,5 +100,17 @@ public class PlacesController {
     @GetMapping("/search")
     public ResponseEntity<List<PlaceSearchResult>> searchPlaces(@RequestParam String keyword) {
         return ResponseEntity.ok(searchPlacesUseCase.execute(keyword));
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likePlace(@PathVariable Long id) {
+        likePlaceUseCase.execute(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Void> unlikePlace(@PathVariable Long id) {
+        unlikePlaceUseCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 }

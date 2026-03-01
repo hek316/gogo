@@ -13,8 +13,12 @@ public interface PlaceJpaRepository extends JpaRepository<PlaceJpaEntity, Long> 
     List<PlaceJpaEntity> findByCategory(String category);
     List<PlaceJpaEntity> findByStatus(PlaceStatus status);
 
-    @Query(value = "SELECT p.* FROM places p LEFT JOIN group_places gp ON gp.place_id = p.id " +
-            "GROUP BY p.id ORDER BY COUNT(gp.id) DESC, p.created_at DESC LIMIT :limit",
+    @Query(value = "SELECT p.* FROM places p " +
+            "LEFT JOIN group_places gp ON gp.place_id = p.id " +
+            "LEFT JOIN place_likes pl ON pl.place_id = p.id " +
+            "GROUP BY p.id " +
+            "ORDER BY (COUNT(DISTINCT gp.id) + COUNT(DISTINCT pl.id) * 0.5) DESC, p.created_at DESC " +
+            "LIMIT :limit",
             nativeQuery = true)
     List<PlaceJpaEntity> findPopularPlaces(@Param("limit") int limit);
 

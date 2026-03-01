@@ -15,7 +15,9 @@ public record PlaceResponse(
         String imageUrl,
         PlaceStatus status,
         String createdBy,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        int likeCount,
+        boolean isLiked
 ) {
     public static PlaceResponse from(Place place) {
         return new PlaceResponse(
@@ -28,7 +30,26 @@ public record PlaceResponse(
                 place.getImageUrl(),
                 place.getStatus(),
                 place.getCreatedBy(),
-                place.getCreatedAt()
+                place.getCreatedAt(),
+                0,
+                false
+        );
+    }
+
+    public static PlaceResponse from(Place place, int likeCount, boolean isLiked) {
+        return new PlaceResponse(
+                place.getId(),
+                place.getName(),
+                place.getAddress(),
+                place.getCategory(),
+                place.getUrl(),
+                place.getNote(),
+                place.getImageUrl(),
+                place.getStatus(),
+                place.getCreatedBy(),
+                place.getCreatedAt(),
+                likeCount,
+                isLiked
         );
     }
 }

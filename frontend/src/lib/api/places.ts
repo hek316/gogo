@@ -13,6 +13,8 @@ export interface Place {
   status: PlaceStatus;
   createdBy: string;
   createdAt: string;
+  likeCount: number;
+  isLiked: boolean;
 }
 
 export interface AddPlaceRequest {
@@ -99,4 +101,20 @@ export async function searchPlaces(keyword: string): Promise<PlaceSearchResult[]
   });
   if (!res.ok) return [];
   return res.json();
+}
+
+export async function likePlace(id: number): Promise<void> {
+  const res = await fetch(`${API_URL}/api/places/${id}/like`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  if (!res.ok) throw new Error('좋아요 처리에 실패했습니다.');
+}
+
+export async function unlikePlace(id: number): Promise<void> {
+  const res = await fetch(`${API_URL}/api/places/${id}/like`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  if (!res.ok) throw new Error('좋아요 취소에 실패했습니다.');
 }

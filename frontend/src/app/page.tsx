@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MapPin, Users, ArrowRight } from 'lucide-react';
+import { MapPin, Users, ArrowRight, Compass, Heart } from 'lucide-react';
 import { getPopularPlaces, Place } from '@/lib/api/places';
 
 const CATEGORY_GRADIENT: Record<string, string> = {
@@ -35,6 +35,13 @@ function PlaceCard({ place }: { place: Place }) {
         <span className="absolute top-2 left-2 bg-black/30 backdrop-blur-sm text-white text-[9px] font-semibold px-2 py-0.5 rounded-full">
           {CATEGORY_LABEL[place.category] ?? place.category}
         </span>
+        {/* 좋아요 카운트 뱃지 */}
+        {place.likeCount > 0 && (
+          <span className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/30 backdrop-blur-sm text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full">
+            <Heart size={8} fill="currentColor" className="text-[#FFB5C5]" />
+            {place.likeCount}
+          </span>
+        )}
       </div>
       {/* Info */}
       <div className="bg-white px-3 py-2.5">
@@ -115,13 +122,33 @@ export default async function Home() {
           </Link>
         </div>
 
+        {/* Explore 바로가기 */}
+        <Link
+          href="/explore"
+          className="flex items-center justify-between bg-white rounded-[24px] px-5 py-4 border border-[rgba(45,38,75,0.07)] shadow-[0_4px_16px_rgba(45,38,75,0.05)] hover:-translate-y-0.5 transition-all duration-200"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#EFEDF7] flex items-center justify-center">
+              <Compass size={16} strokeWidth={1} stroke="#9D8DC2" />
+            </div>
+            <div>
+              <p className="font-semibold text-[#2D264B] text-sm tracking-[-0.03em]">장소 탐색</p>
+              <p className="text-[rgba(45,38,75,0.4)] text-xs mt-0.5">모두의 장소를 둘러보세요</p>
+            </div>
+          </div>
+          <ArrowRight size={14} strokeWidth={1.5} stroke="rgba(45,38,75,0.3)" />
+        </Link>
+
         {/* Popular places feed */}
         {popularPlaces.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3 px-0.5">
-              <p className="text-[#2D264B] text-sm font-semibold tracking-[-0.03em]">지금 뜨는 장소</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[#2D264B] text-sm font-semibold tracking-[-0.03em]">지금 뜨는 장소</p>
+                <Heart size={12} fill="#FFB5C5" stroke="none" />
+              </div>
               <Link
-                href="/places"
+                href="/explore"
                 className="text-[#9D8DC2] text-xs font-semibold flex items-center gap-1 hover:underline"
               >
                 더 보기 <ArrowRight size={11} strokeWidth={1.5} />
