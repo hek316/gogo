@@ -7,12 +7,14 @@ async function handler(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
+  console.log(`[Proxy] handler invoked, BACKEND_URL=${BACKEND_URL}`);
+
   try {
     const { path } = await params;
     const search = req.nextUrl.search;
     const url = `${BACKEND_URL}/${path.join('/')}${search}`;
 
-    console.log(`[Proxy] ${req.method} ${url} (BACKEND_URL=${BACKEND_URL})`);
+    console.log(`[Proxy] ${req.method} ${url}`);
 
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access-token')?.value;
@@ -29,14 +31,18 @@ async function handler(
       headers.set('Authorization', `Bearer ${accessToken}`);
     }
 
-    const init: RequestInit = { method: req.method, headers };
+    const init: RequestInit = {
+      method: req.method,
+      headers,
+      signal: AbortSignal.timeout(8000), // 8s — Vercel 10s 제한 이내
+    };
 
     if (!['GET', 'HEAD'].includes(req.method)) {
       init.body = await req.arrayBuffer();
     }
 
     const res = await fetch(url, init);
-    console.log(`[Proxy] response status: ${res.status}`);
+    console.log(`[Proxy] response ${res.status} from ${url}`);
 
     const data = await res.arrayBuffer();
 
@@ -54,7 +60,7 @@ async function handler(
       headers: responseHeaders,
     });
   } catch (error) {
-    console.error(`[Proxy] ERROR`, error);
+    console.error(`[Proxy] ERROR: ${String(error)}`);
     return NextResponse.json(
       { error: 'Proxy error', detail: String(error) },
       { status: 503 }
