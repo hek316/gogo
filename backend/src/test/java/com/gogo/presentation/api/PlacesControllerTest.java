@@ -66,7 +66,7 @@ class PlacesControllerTest {
     @Test
     @WithMockUser
     void POST_api_places_성공() throws Exception {
-        PlaceResponse response = new PlaceResponse(1L, "성수동 카페", "서울 성동구", "CAFE", null, null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now());
+        PlaceResponse response = new PlaceResponse(1L, "성수동 카페", "서울 성동구", "CAFE", null, null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now(), 0, false);
         given(addPlaceUseCase.execute(any())).willReturn(response);
 
         mockMvc.perform(post("/api/places")
@@ -82,7 +82,7 @@ class PlacesControllerTest {
     @Test
     @WithMockUser
     void GET_api_places_목록_반환() throws Exception {
-        PlaceResponse place = new PlaceResponse(1L, "카페A", "서울", "CAFE", null, null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now());
+        PlaceResponse place = new PlaceResponse(1L, "카페A", "서울", "CAFE", null, null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now(), 0, false);
         given(getPlacesUseCase.execute(isNull())).willReturn(List.of(place));
 
         mockMvc.perform(get("/api/places"))
