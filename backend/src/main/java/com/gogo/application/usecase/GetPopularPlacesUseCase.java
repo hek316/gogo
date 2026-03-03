@@ -3,9 +3,7 @@ package com.gogo.application.usecase;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.domain.repository.PlaceLikeRepository;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.AuthenticatedUser;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.gogo.infrastructure.security.SecurityContextHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,26 +15,20 @@ public class GetPopularPlacesUseCase {
 
     private final PlaceRepository placeRepository;
     private final PlaceLikeRepository placeLikeRepository;
+    private final SecurityContextHelper securityContextHelper;
 
-    public GetPopularPlacesUseCase(PlaceRepository placeRepository, PlaceLikeRepository placeLikeRepository) {
+    public GetPopularPlacesUseCase(PlaceRepository placeRepository, PlaceLikeRepository placeLikeRepository, SecurityContextHelper securityContextHelper) {
         this.placeRepository = placeRepository;
         this.placeLikeRepository = placeLikeRepository;
+        this.securityContextHelper = securityContextHelper;
     }
 
     public List<PlaceResponse> execute(int limit) {
-        Long userId = extractUserId();
+        Long userId = securityContextHelper.currentUserId().orElse(null);
         return placeRepository.findPopularPlaces(limit).stream()
                 .map(p -> PlaceResponse.from(p,
                         placeLikeRepository.countByPlaceId(p.getId()),
                         userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, p.getId())))
                 .toList();
-    }
-
-    private Long extractUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
-            return user.userId();
-        }
-        return null;
     }
 }

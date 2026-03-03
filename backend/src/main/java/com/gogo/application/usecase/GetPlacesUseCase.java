@@ -3,9 +3,7 @@ package com.gogo.application.usecase;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.domain.repository.PlaceLikeRepository;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.AuthenticatedUser;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.gogo.infrastructure.security.SecurityContextHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,14 +15,16 @@ public class GetPlacesUseCase {
 
     private final PlaceRepository placeRepository;
     private final PlaceLikeRepository placeLikeRepository;
+    private final SecurityContextHelper securityContextHelper;
 
-    public GetPlacesUseCase(PlaceRepository placeRepository, PlaceLikeRepository placeLikeRepository) {
+    public GetPlacesUseCase(PlaceRepository placeRepository, PlaceLikeRepository placeLikeRepository, SecurityContextHelper securityContextHelper) {
         this.placeRepository = placeRepository;
         this.placeLikeRepository = placeLikeRepository;
+        this.securityContextHelper = securityContextHelper;
     }
 
     public List<PlaceResponse> execute(String category) {
-        Long userId = extractUserId();
+        Long userId = securityContextHelper.currentUserId().orElse(null);
         List<com.gogo.domain.entity.Place> places = (category != null && !category.isBlank())
                 ? placeRepository.findByCategory(category)
                 : placeRepository.findAll();
@@ -33,13 +33,5 @@ public class GetPlacesUseCase {
                         placeLikeRepository.countByPlaceId(p.getId()),
                         userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, p.getId())))
                 .toList();
-    }
-
-    private Long extractUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
-            return user.userId();
-        }
-        return null;
     }
 }
