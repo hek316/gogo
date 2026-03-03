@@ -5,20 +5,18 @@ import com.gogo.application.dto.PlaceResponse;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.entity.PlaceStatus;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.AuthenticatedUser;
-import org.junit.jupiter.api.AfterEach;
+import com.gogo.infrastructure.security.SecurityContextHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collections;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -28,37 +26,32 @@ class AddPlaceUseCaseTest {
     @Mock
     private PlaceRepository placeRepository;
 
+    @Mock
+    private SecurityContextHelper securityContextHelper;
+
     @InjectMocks
     private AddPlaceUseCase addPlaceUseCase;
 
     @BeforeEach
-    void setUpSecurityContext() {
-        AuthenticatedUser principal = new AuthenticatedUser(1L, "홍길동");
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList()));
-    }
-
-    @AfterEach
-    void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
+    void setUp() {
+        given(securityContextHelper.currentNickname()).willReturn(Optional.of("tester"));
     }
 
     @Test
-    void 유효한_데이터로_장소_추가_성공() {
-        AddPlaceRequest request = new AddPlaceRequest("성수동 카페", "서울 성동구", "CAFE", "https://naver.me/xxx", "분위기 좋음", null);
-
-        Place saved = Place.create(request.name(), request.address(), request.category(), request.url(), request.note(), request.imageUrl(), "홍길동");
+    void addPlaceSuccess() {
+        AddPlaceRequest request = new AddPlaceRequest("Cafe", "Seoul", "CAFE", "https://naver.me/xxx", "good", null);
+        Place saved = Place.create(request.name(), request.address(), request.category(), request.url(), request.note(), request.imageUrl(), "tester");
         given(placeRepository.save(any(Place.class))).willReturn(saved);
 
         PlaceResponse response = addPlaceUseCase.execute(request);
 
-        assertThat(response.name()).isEqualTo("성수동 카페");
+        assertThat(response.name()).isEqualTo("Cafe");
         assertThat(response.status()).isEqualTo(PlaceStatus.WANT_TO_GO);
     }
 
     @Test
-    void 이름없는_장소_추가시_예외() {
-        AddPlaceRequest request = new AddPlaceRequest("", "서울 성동구", "CAFE", null, null, null);
+    void addPlaceWithoutNameThrows() {
+        AddPlaceRequest request = new AddPlaceRequest("", "Seoul", "CAFE", null, null, null);
 
         assertThatThrownBy(() -> addPlaceUseCase.execute(request))
                 .isInstanceOf(IllegalArgumentException.class);

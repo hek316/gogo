@@ -4,6 +4,8 @@ import com.gogo.application.dto.PlaceResponse;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.PlaceLikeRepository;
 import com.gogo.domain.repository.PlaceRepository;
+import com.gogo.infrastructure.security.SecurityContextHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,8 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,14 +27,22 @@ class GetPlacesUseCaseTest {
     @Mock
     private PlaceLikeRepository placeLikeRepository;
 
+    @Mock
+    private SecurityContextHelper securityContextHelper;
+
     @InjectMocks
     private GetPlacesUseCase getPlacesUseCase;
 
+    @BeforeEach
+    void setUp() {
+        given(securityContextHelper.currentUserId()).willReturn(Optional.of(1L));
+    }
+
     @Test
-    void 전체_장소_목록_조회() {
+    void getAllPlaces() {
         given(placeRepository.findAll()).willReturn(List.of(
-                Place.create("카페A", "서울", "CAFE", null, null, null, "홍길동"),
-                Place.create("식당B", "서울", "RESTAURANT", null, null, null, "김철수")
+                Place.create("CafeA", "Seoul", "CAFE", null, null, null, "ownerA"),
+                Place.create("FoodB", "Seoul", "RESTAURANT", null, null, null, "ownerB")
         ));
 
         List<PlaceResponse> result = getPlacesUseCase.execute(null);
@@ -40,9 +51,9 @@ class GetPlacesUseCaseTest {
     }
 
     @Test
-    void 카테고리별_필터링() {
+    void getPlacesByCategory() {
         given(placeRepository.findByCategory("CAFE")).willReturn(List.of(
-                Place.create("카페A", "서울", "CAFE", null, null, null, "홍길동")
+                Place.create("CafeA", "Seoul", "CAFE", null, null, null, "ownerA")
         ));
 
         List<PlaceResponse> result = getPlacesUseCase.execute("CAFE");

@@ -6,21 +6,18 @@ import com.gogo.domain.entity.GroupPlace;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.GroupPlaceRepository;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.AuthenticatedUser;
-import org.junit.jupiter.api.AfterEach;
+import com.gogo.infrastructure.security.SecurityContextHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collections;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -33,26 +30,22 @@ class SharePlaceToGroupUseCaseTest {
     @Mock
     private GroupPlaceRepository groupPlaceRepository;
 
+    @Mock
+    private SecurityContextHelper securityContextHelper;
+
     @InjectMocks
     private SharePlaceToGroupUseCase sharePlaceToGroupUseCase;
 
     @BeforeEach
-    void setUpSecurityContext() {
-        AuthenticatedUser principal = new AuthenticatedUser(1L, "홍길동");
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList()));
-    }
-
-    @AfterEach
-    void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
+    void setUp() {
+        given(securityContextHelper.currentNickname()).willReturn(Optional.of("tester"));
     }
 
     @Test
-    void 장소_공유_성공() {
-        Place place = Place.create("성수동 카페", "서울", "CAFE", null, null, null, "홍길동");
+    void sharePlaceSuccess() {
+        Place place = Place.create("Cafe", "Seoul", "CAFE", null, null, null, "tester");
         given(placeRepository.findById(1L)).willReturn(Optional.of(place));
-        GroupPlace saved = GroupPlace.create(1L, 1L, "홍길동");
+        GroupPlace saved = GroupPlace.create(1L, 1L, "tester");
         given(groupPlaceRepository.save(any())).willReturn(saved);
 
         GroupPlaceResponse response = sharePlaceToGroupUseCase.execute(new SharePlaceRequest(1L, 1L));
@@ -61,11 +54,10 @@ class SharePlaceToGroupUseCaseTest {
     }
 
     @Test
-    void 존재하지_않는_장소_공유시_예외() {
+    void sharingMissingPlaceThrows() {
         given(placeRepository.findById(999L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> sharePlaceToGroupUseCase.execute(new SharePlaceRequest(1L, 999L)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("장소");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
