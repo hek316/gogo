@@ -1,7 +1,9 @@
 package com.gogo.presentation.api;
 
 import com.gogo.application.dto.*;
-import com.gogo.application.usecase.*;
+import com.gogo.application.service.MeetingService;
+import com.gogo.application.usecase.FinalizeMeetingUseCase;
+import com.gogo.application.usecase.VotePlaceUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,17 +12,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class MeetingsController {
 
-    private final CreateMeetingUseCase createMeetingUseCase;
-    private final GetMeetingResultUseCase getMeetingResultUseCase;
+    private final MeetingService meetingService;
     private final VotePlaceUseCase votePlaceUseCase;
     private final FinalizeMeetingUseCase finalizeMeetingUseCase;
 
-    public MeetingsController(CreateMeetingUseCase createMeetingUseCase,
-                               GetMeetingResultUseCase getMeetingResultUseCase,
+    public MeetingsController(MeetingService meetingService,
                                VotePlaceUseCase votePlaceUseCase,
                                FinalizeMeetingUseCase finalizeMeetingUseCase) {
-        this.createMeetingUseCase = createMeetingUseCase;
-        this.getMeetingResultUseCase = getMeetingResultUseCase;
+        this.meetingService = meetingService;
         this.votePlaceUseCase = votePlaceUseCase;
         this.finalizeMeetingUseCase = finalizeMeetingUseCase;
     }
@@ -30,14 +29,14 @@ public class MeetingsController {
     public ResponseEntity<MeetingResponse> createMeeting(@PathVariable Long groupId,
                                                           @Valid @RequestBody CreateMeetingRequest request) {
         CreateMeetingRequest withGroupId = new CreateMeetingRequest(groupId, request.title(), request.candidatePlaceIds());
-        return ResponseEntity.status(HttpStatus.CREATED).body(createMeetingUseCase.execute(withGroupId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(meetingService.createMeeting(withGroupId));
     }
 
     // 약속 상세 + 투표 현황
     @GetMapping("/api/groups/{groupId}/meetings/{id}")
     public ResponseEntity<MeetingResponse> getMeeting(@PathVariable Long groupId,
                                                        @PathVariable Long id) {
-        return ResponseEntity.ok(getMeetingResultUseCase.execute(id));
+        return ResponseEntity.ok(meetingService.getMeetingResult(id));
     }
 
     // 투표

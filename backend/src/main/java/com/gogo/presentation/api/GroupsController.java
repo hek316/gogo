@@ -1,7 +1,11 @@
 package com.gogo.presentation.api;
 
 import com.gogo.application.dto.*;
-import com.gogo.application.usecase.*;
+import com.gogo.application.service.GroupQueryService;
+import com.gogo.application.usecase.CreateGroupUseCase;
+import com.gogo.application.usecase.GetGroupPlacesUseCase;
+import com.gogo.application.usecase.JoinGroupUseCase;
+import com.gogo.application.usecase.SharePlaceToGroupUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,18 +19,18 @@ public class GroupsController {
 
     private final CreateGroupUseCase createGroupUseCase;
     private final JoinGroupUseCase joinGroupUseCase;
-    private final GetGroupUseCase getGroupUseCase;
+    private final GroupQueryService groupQueryService;
     private final SharePlaceToGroupUseCase sharePlaceToGroupUseCase;
     private final GetGroupPlacesUseCase getGroupPlacesUseCase;
 
     public GroupsController(CreateGroupUseCase createGroupUseCase,
                             JoinGroupUseCase joinGroupUseCase,
-                            GetGroupUseCase getGroupUseCase,
+                            GroupQueryService groupQueryService,
                             SharePlaceToGroupUseCase sharePlaceToGroupUseCase,
                             GetGroupPlacesUseCase getGroupPlacesUseCase) {
         this.createGroupUseCase = createGroupUseCase;
         this.joinGroupUseCase = joinGroupUseCase;
-        this.getGroupUseCase = getGroupUseCase;
+        this.groupQueryService = groupQueryService;
         this.sharePlaceToGroupUseCase = sharePlaceToGroupUseCase;
         this.getGroupPlacesUseCase = getGroupPlacesUseCase;
     }
@@ -43,7 +47,7 @@ public class GroupsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<GroupResponse> getGroup(@PathVariable Long id) {
-        return ResponseEntity.ok(getGroupUseCase.execute(id));
+        return ResponseEntity.ok(groupQueryService.getGroup(id));
     }
 
     @PostMapping("/{id}/places")

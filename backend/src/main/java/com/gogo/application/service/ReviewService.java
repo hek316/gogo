@@ -1,4 +1,4 @@
-package com.gogo.application.usecase;
+package com.gogo.application.service;
 
 import com.gogo.application.dto.AddReviewRequest;
 import com.gogo.application.dto.ReviewResponse;
@@ -7,20 +7,28 @@ import com.gogo.domain.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
-public class AddReviewUseCase {
+public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    public AddReviewUseCase(ReviewRepository reviewRepository) {
+    public ReviewService(ReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
     }
 
-    public ReviewResponse execute(Long placeId, AddReviewRequest request) {
+    public ReviewResponse addReview(Long placeId, AddReviewRequest request) {
         Review review = Review.create(placeId, request.authorName(), request.rating(),
                 request.content(), request.visitedAt());
-        Review saved = reviewRepository.save(review);
-        return ReviewResponse.from(saved);
+        return ReviewResponse.from(reviewRepository.save(review));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getReviews(Long placeId) {
+        return reviewRepository.findByPlaceId(placeId).stream()
+                .map(ReviewResponse::from)
+                .toList();
     }
 }

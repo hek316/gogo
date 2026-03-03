@@ -1,4 +1,4 @@
-package com.gogo.application.usecase;
+package com.gogo.application.service;
 
 import com.gogo.application.dto.AddReviewRequest;
 import com.gogo.application.dto.ReviewResponse;
@@ -19,10 +19,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class AddReviewUseCaseTest {
+class ReviewServiceTest {
 
     @Mock ReviewRepository reviewRepository;
-    @InjectMocks AddReviewUseCase addReviewUseCase;
+    @InjectMocks ReviewService reviewService;
 
     @Test
     void 후기_작성_성공() {
@@ -30,7 +30,7 @@ class AddReviewUseCaseTest {
         given(reviewRepository.save(any(Review.class))).willReturn(saved);
 
         AddReviewRequest request = new AddReviewRequest("홍길동", 5, "너무 좋아요!", LocalDate.now());
-        ReviewResponse result = addReviewUseCase.execute(1L, request);
+        ReviewResponse result = reviewService.addReview(1L, request);
 
         assertThat(result.id()).isEqualTo(1L);
         assertThat(result.authorName()).isEqualTo("홍길동");
@@ -41,7 +41,7 @@ class AddReviewUseCaseTest {
     void 별점_범위_초과_예외() {
         AddReviewRequest request = new AddReviewRequest("홍길동", 6, "좋아요", LocalDate.now());
 
-        assertThatThrownBy(() -> addReviewUseCase.execute(1L, request))
+        assertThatThrownBy(() -> reviewService.addReview(1L, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("별점");
     }
@@ -50,7 +50,7 @@ class AddReviewUseCaseTest {
     void 별점_0이하_예외() {
         AddReviewRequest request = new AddReviewRequest("홍길동", 0, "좋아요", LocalDate.now());
 
-        assertThatThrownBy(() -> addReviewUseCase.execute(1L, request))
+        assertThatThrownBy(() -> reviewService.addReview(1L, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("별점");
     }

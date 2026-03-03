@@ -1,6 +1,8 @@
-package com.gogo.application.usecase;
+package com.gogo.application.service;
 
+import com.gogo.application.dto.CreateMeetingRequest;
 import com.gogo.application.dto.MeetingResponse;
+import com.gogo.domain.entity.Meeting;
 import com.gogo.domain.entity.MeetingVote;
 import com.gogo.domain.repository.MeetingRepository;
 import com.gogo.domain.repository.MeetingVoteRepository;
@@ -10,18 +12,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
-public class GetMeetingResultUseCase {
+@Transactional
+public class MeetingService {
 
     private final MeetingRepository meetingRepository;
     private final MeetingVoteRepository meetingVoteRepository;
 
-    public GetMeetingResultUseCase(MeetingRepository meetingRepository, MeetingVoteRepository meetingVoteRepository) {
+    public MeetingService(MeetingRepository meetingRepository, MeetingVoteRepository meetingVoteRepository) {
         this.meetingRepository = meetingRepository;
         this.meetingVoteRepository = meetingVoteRepository;
     }
 
-    public MeetingResponse execute(Long meetingId) {
+    public MeetingResponse createMeeting(CreateMeetingRequest request) {
+        Meeting meeting = Meeting.create(request.groupId(), request.title(), request.candidatePlaceIds());
+        Meeting saved = meetingRepository.save(meeting);
+        return MeetingResponse.of(saved, List.of());
+    }
+
+    @Transactional(readOnly = true)
+    public MeetingResponse getMeetingResult(Long meetingId) {
         return meetingRepository.findById(meetingId)
                 .map(meeting -> {
                     List<MeetingVote> votes = meetingVoteRepository.findByMeetingId(meetingId);

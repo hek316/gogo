@@ -2,8 +2,8 @@ package com.gogo.presentation.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gogo.application.dto.PlaceResponse;
+import com.gogo.application.service.PlaceCommandService;
 import com.gogo.application.usecase.AddPlaceUseCase;
-import com.gogo.application.usecase.DeletePlaceUseCase;
 import com.gogo.application.usecase.FetchPlacePreviewUseCase;
 import com.gogo.application.usecase.GetPlaceUseCase;
 import com.gogo.application.usecase.GetPlacesUseCase;
@@ -52,7 +52,7 @@ class PlacesControllerTest {
     private GetPlaceUseCase getPlaceUseCase;
 
     @MockitoBean
-    private DeletePlaceUseCase deletePlaceUseCase;
+    private PlaceCommandService placeCommandService;
 
     @MockitoBean
     private MarkPlaceVisitedUseCase markPlaceVisitedUseCase;

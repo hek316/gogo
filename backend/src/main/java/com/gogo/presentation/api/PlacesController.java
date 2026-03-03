@@ -4,6 +4,7 @@ import com.gogo.application.dto.AddPlaceRequest;
 import com.gogo.application.dto.PlacePreviewResponse;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.dto.PlaceSearchResult;
+import com.gogo.application.service.PlaceCommandService;
 import com.gogo.application.usecase.*;
 import com.gogo.application.usecase.LikePlaceUseCase;
 import com.gogo.application.usecase.UnlikePlaceUseCase;
@@ -24,7 +25,7 @@ public class PlacesController {
     private final AddPlaceUseCase addPlaceUseCase;
     private final GetPlacesUseCase getPlacesUseCase;
     private final GetPlaceUseCase getPlaceUseCase;
-    private final DeletePlaceUseCase deletePlaceUseCase;
+    private final PlaceCommandService placeCommandService;
     private final MarkPlaceVisitedUseCase markPlaceVisitedUseCase;
     private final GetPopularPlacesUseCase getPopularPlacesUseCase;
     private final GetRecentPlacesUseCase getRecentPlacesUseCase;
@@ -36,7 +37,7 @@ public class PlacesController {
     public PlacesController(AddPlaceUseCase addPlaceUseCase,
                             GetPlacesUseCase getPlacesUseCase,
                             GetPlaceUseCase getPlaceUseCase,
-                            DeletePlaceUseCase deletePlaceUseCase,
+                            PlaceCommandService placeCommandService,
                             MarkPlaceVisitedUseCase markPlaceVisitedUseCase,
                             GetPopularPlacesUseCase getPopularPlacesUseCase,
                             GetRecentPlacesUseCase getRecentPlacesUseCase,
@@ -47,7 +48,7 @@ public class PlacesController {
         this.addPlaceUseCase = addPlaceUseCase;
         this.getPlacesUseCase = getPlacesUseCase;
         this.getPlaceUseCase = getPlaceUseCase;
-        this.deletePlaceUseCase = deletePlaceUseCase;
+        this.placeCommandService = placeCommandService;
         this.markPlaceVisitedUseCase = markPlaceVisitedUseCase;
         this.getPopularPlacesUseCase = getPopularPlacesUseCase;
         this.getRecentPlacesUseCase = getRecentPlacesUseCase;
@@ -74,7 +75,7 @@ public class PlacesController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlace(@PathVariable Long id) {
-        deletePlaceUseCase.execute(id);
+        placeCommandService.deletePlace(id);
         return ResponseEntity.noContent().build();
     }
 
