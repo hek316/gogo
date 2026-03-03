@@ -19,8 +19,11 @@
                   │ DTO (Request/Response)
 ┌─────────────────▼───────────────────────────────────┐
 │              Application Layer                       │
-│   24+ UseCase (각 1개 비즈니스 오퍼레이션)            │
-│   SecurityContextHelper (@Component)                 │
+│   14 UseCase (복잡한 오퍼레이션 전용)                 │
+│   7 Service (단순 CRUD/조회 통합: PlaceQueryService,  │
+│             PlaceCommandService, PlaceLikeService,   │
+│             GroupService, MeetingService,            │
+│             ReviewService, AuthService)              │
 │   KakaoOAuthClient / GoogleOAuthClient              │
 └─────────────────┬───────────────────────────────────┘
                   │ Domain Interface (DI 역전)
@@ -223,13 +226,52 @@ userRepository.findById(principal.userId()); // Controller가 직접 DB 조회
 
 ---
 
-### P3 — 다음 스프린트 (ADR-002 Service 추출)
+### P3 — UseCase → Service 통합 (진행중)
 
-- [ ] **단순 UseCase → `XxxQueryService` / `XxxCommandService` 통합**
-  - 단순 기준: 단일 Repository CRUD/조회, 분기 없음, 실패 케이스 1개 이하
-  - 단순 CRUD/조회는 도메인별 `XxxQueryService` / `XxxCommandService`로 통합한다
-  - 대상 후보: `DeletePlaceUseCase`, `GetGroupUseCase`, `GetReviewsUseCase`, `GetGroupPlacesUseCase` 등
-  - 완료 기준: UseCase 수 26개 → 15개 이하, `./gradlew test` 통과
+#### ✅ P3 1차 (커밋 43d6e9f) — 6개 UseCase → 4 Service
+- [x] DeletePlaceUseCase → PlaceCommandService.deletePlace()
+- [x] GetGroupUseCase → GroupService.getGroup()
+- [x] CreateGroupUseCase → GroupService.createGroup()
+- [x] JoinGroupUseCase → GroupService.joinGroup()
+- [x] GetGroupPlacesUseCase → GroupService.getGroupPlaces()
+- [x] GetReviewsUseCase → ReviewService.getReviews()
+
+#### ✅ P3 2차 (커밋 f1d03ea) — 7개 UseCase → 4 Service
+- [x] AddPlaceUseCase → PlaceCommandService.addPlace()
+- [x] LikePlaceUseCase → PlaceLikeService.like()
+- [x] UnlikePlaceUseCase → PlaceLikeService.unlike()
+- [x] CreateGroupUseCase (잔존분) → GroupService 흡수
+- [x] JoinGroupUseCase (잔존분) → GroupService 흡수
+- [x] GetGroupPlacesUseCase (잔존분) → GroupService 흡수
+- [x] LogoutUseCase → AuthService.logout()
+- 결과: UseCase 21 → 14개 ✅
+
+#### 🔲 P3 3차 — 추가 후보 9개
+```
+그룹 A: GetPlace × 4 → PlaceQueryService (신규)
+  GetPlaceUseCase         → PlaceQueryService.getPlace(Long id)
+  GetPlacesUseCase        → PlaceQueryService.getPlaces(String category)
+  GetPopularPlacesUseCase → PlaceQueryService.getPopularPlaces(int limit)
+  GetRecentPlacesUseCase  → PlaceQueryService.getRecent(int limit)
+
+그룹 B: MarkPlaceVisited → PlaceCommandService (기존)
+  MarkPlaceVisitedUseCase → PlaceCommandService.markVisited(Long id)
+
+그룹 C: SharePlaceToGroup → GroupService (기존)
+  SharePlaceToGroupUseCase → GroupService.sharePlaceToGroup(SharePlaceRequest)
+
+그룹 D: VotePlace + FinalizeMeeting → MeetingService (기존)
+  VotePlaceUseCase       → MeetingService.vote(Long meetingId, VoteRequest)
+  FinalizeMeetingUseCase → MeetingService.finalize(Long meetingId, FinalizeRequest)
+
+그룹 E: GetCurrentUser → AuthService (기존)
+  GetCurrentUserUseCase  → AuthService.getCurrentUser()
+```
+- 완료 기준: UseCase 14 → 5개, `./gradlew test` 통과
+
+#### ⚠️ 보류: SearchPlacesUseCase
+- Application → Infrastructure 직접 임포트(`NaverLocalApiClient`) 위반 내포
+- 단순 이동보다 `application/port/PlaceSearchPort` 인터페이스 추출 선행 필요
 
 ---
 
@@ -261,7 +303,7 @@ userRepository.findById(principal.userId()); // Controller가 직접 DB 조회
 
 | 항목 | 근거 |
 |------|------|
-| UseCase 단일 책임 분리 (24개) | 비즈니스 로직이 Controller/Repository에 새어나가지 않음 |
+| UseCase 단일 책임 분리 (5개 유지) | 복잡한 OAuth/토큰/외부 API 로직이 Service 비대화 없이 분리됨 |
 | PlacesController, GroupsController 경계 준수 | UseCase만 의존, 올바른 레이어 경계의 예시 |
 | SecurityContextHelper 리팩터링 | 11개 파일 중복 제거, 다음 단계는 AuthContext 인터페이스화 |
 | Repository 인터페이스 패턴 | 테스트 용이성 확보, Mock 주입 가능 — Domain/JPA 통합 후에도 유지 |

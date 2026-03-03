@@ -6,7 +6,9 @@ import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.dto.PlaceSearchResult;
 import com.gogo.application.service.PlaceCommandService;
 import com.gogo.application.service.PlaceLikeService;
-import com.gogo.application.usecase.*;
+import com.gogo.application.service.PlaceQueryService;
+import com.gogo.application.usecase.FetchPlacePreviewUseCase;
+import com.gogo.application.usecase.SearchPlacesUseCase;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,31 +23,19 @@ import java.util.List;
 public class PlacesController {
     private static final Logger log = LoggerFactory.getLogger(PlacesController.class);
 
-    private final GetPlacesUseCase getPlacesUseCase;
-    private final GetPlaceUseCase getPlaceUseCase;
+    private final PlaceQueryService placeQueryService;
     private final PlaceCommandService placeCommandService;
-    private final MarkPlaceVisitedUseCase markPlaceVisitedUseCase;
-    private final GetPopularPlacesUseCase getPopularPlacesUseCase;
-    private final GetRecentPlacesUseCase getRecentPlacesUseCase;
     private final FetchPlacePreviewUseCase fetchPlacePreviewUseCase;
     private final SearchPlacesUseCase searchPlacesUseCase;
     private final PlaceLikeService placeLikeService;
 
-    public PlacesController(GetPlacesUseCase getPlacesUseCase,
-                            GetPlaceUseCase getPlaceUseCase,
+    public PlacesController(PlaceQueryService placeQueryService,
                             PlaceCommandService placeCommandService,
-                            MarkPlaceVisitedUseCase markPlaceVisitedUseCase,
-                            GetPopularPlacesUseCase getPopularPlacesUseCase,
-                            GetRecentPlacesUseCase getRecentPlacesUseCase,
                             FetchPlacePreviewUseCase fetchPlacePreviewUseCase,
                             SearchPlacesUseCase searchPlacesUseCase,
                             PlaceLikeService placeLikeService) {
-        this.getPlacesUseCase = getPlacesUseCase;
-        this.getPlaceUseCase = getPlaceUseCase;
+        this.placeQueryService = placeQueryService;
         this.placeCommandService = placeCommandService;
-        this.markPlaceVisitedUseCase = markPlaceVisitedUseCase;
-        this.getPopularPlacesUseCase = getPopularPlacesUseCase;
-        this.getRecentPlacesUseCase = getRecentPlacesUseCase;
         this.fetchPlacePreviewUseCase = fetchPlacePreviewUseCase;
         this.searchPlacesUseCase = searchPlacesUseCase;
         this.placeLikeService = placeLikeService;
@@ -58,12 +48,12 @@ public class PlacesController {
 
     @GetMapping
     public ResponseEntity<List<PlaceResponse>> getPlaces(@RequestParam(required = false) String category) {
-        return ResponseEntity.ok(getPlacesUseCase.execute(category));
+        return ResponseEntity.ok(placeQueryService.getPlaces(category));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlaceResponse> getPlace(@PathVariable Long id) {
-        return ResponseEntity.ok(getPlaceUseCase.execute(id));
+        return ResponseEntity.ok(placeQueryService.getPlace(id));
     }
 
     @DeleteMapping("/{id}")
@@ -74,19 +64,19 @@ public class PlacesController {
 
     @PatchMapping("/{id}/visit")
     public ResponseEntity<PlaceResponse> markVisited(@PathVariable Long id) {
-        return ResponseEntity.ok(markPlaceVisitedUseCase.execute(id));
+        return ResponseEntity.ok(placeCommandService.markVisited(id));
     }
 
     @GetMapping("/popular")
     public ResponseEntity<List<PlaceResponse>> getPopularPlaces(
             @RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(getPopularPlacesUseCase.execute(limit));
+        return ResponseEntity.ok(placeQueryService.getPopularPlaces(limit));
     }
 
     @GetMapping("/recent")
     public ResponseEntity<List<PlaceResponse>> getRecentPlaces(
             @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(getRecentPlacesUseCase.execute(limit));
+        return ResponseEntity.ok(placeQueryService.getRecent(limit));
     }
 
     @GetMapping("/preview")

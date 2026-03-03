@@ -1,10 +1,14 @@
 package com.gogo.application.service;
 
 import com.gogo.application.dto.CreateGroupRequest;
+import com.gogo.application.dto.GroupPlaceResponse;
 import com.gogo.application.dto.GroupResponse;
 import com.gogo.application.dto.JoinGroupRequest;
+import com.gogo.application.dto.SharePlaceRequest;
 import com.gogo.application.port.AuthContext;
 import com.gogo.domain.entity.Group;
+import com.gogo.domain.entity.GroupPlace;
+import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.GroupPlaceRepository;
 import com.gogo.domain.repository.GroupRepository;
 import com.gogo.domain.repository.PlaceRepository;
@@ -80,6 +84,26 @@ class GroupServiceTest {
         given(groupRepository.findByInviteCode("invalid0")).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> groupService.joinGroup(new JoinGroupRequest("invalid0")))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void sharePlaceToGroupSuccess() {
+        Place place = Place.create("Cafe", "Seoul", "CAFE", null, null, null, "tester");
+        given(placeRepository.findById(1L)).willReturn(Optional.of(place));
+        GroupPlace saved = GroupPlace.create(1L, 1L, "tester");
+        given(groupPlaceRepository.save(any())).willReturn(saved);
+
+        GroupPlaceResponse response = groupService.sharePlaceToGroup(new SharePlaceRequest(1L, 1L));
+
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    void sharePlaceMissingPlaceThrows() {
+        given(placeRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> groupService.sharePlaceToGroup(new SharePlaceRequest(1L, 999L)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

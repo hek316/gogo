@@ -1,11 +1,16 @@
 package com.gogo.application.service;
 
 import com.gogo.application.dto.CreateMeetingRequest;
+import com.gogo.application.dto.FinalizeRequest;
 import com.gogo.application.dto.MeetingResponse;
+import com.gogo.application.dto.VoteRequest;
 import com.gogo.domain.entity.Meeting;
+import com.gogo.domain.entity.MeetingStatus;
 import com.gogo.domain.entity.MeetingVote;
 import com.gogo.domain.repository.MeetingRepository;
 import com.gogo.domain.repository.MeetingVoteRepository;
+
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,5 +42,32 @@ public class MeetingService {
                     return MeetingResponse.of(meeting, votes);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("약속을 찾을 수 없습니다. id=" + meetingId));
+    }
+
+    public MeetingResponse vote(Long meetingId, VoteRequest request) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("약속을 찾을 수 없습니다. id=" + meetingId));
+
+        if (meeting.getStatus() == MeetingStatus.CONFIRMED) {
+            throw new IllegalStateException("이미 확정된 약속에는 투표할 수 없습니다.");
+        }
+
+        Optional<MeetingVote> existing = meetingVoteRepository
+                .findByMeetingIdAndVoterName(meetingId, request.voterName());
+        existing.ifPresent(v -> meetingVoteRepository.deleteById(v.getId()));
+
+        meetingVoteRepository.save(MeetingVote.create(meetingId, request.placeId(), request.voterName()));
+
+        List<MeetingVote> votes = meetingVoteRepository.findByMeetingId(meetingId);
+        return MeetingResponse.of(meeting, votes);
+    }
+
+    public MeetingResponse finalize(Long meetingId, FinalizeRequest request) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("약속을 찾을 수 없습니다. id=" + meetingId));
+        meeting.confirm(request.confirmedPlaceId());
+        Meeting saved = meetingRepository.save(meeting);
+        List<MeetingVote> votes = meetingVoteRepository.findByMeetingId(meetingId);
+        return MeetingResponse.of(saved, votes);
     }
 }

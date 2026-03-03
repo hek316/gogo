@@ -1,10 +1,10 @@
-package com.gogo.application.usecase;
+package com.gogo.application.service;
 
 import com.gogo.application.dto.PlaceResponse;
+import com.gogo.application.port.AuthContext;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.PlaceLikeRepository;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.application.port.AuthContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class GetPlacesUseCaseTest {
+class PlaceQueryServiceTest {
 
     @Mock
     private PlaceRepository placeRepository;
@@ -31,7 +31,7 @@ class GetPlacesUseCaseTest {
     private AuthContext authContext;
 
     @InjectMocks
-    private GetPlacesUseCase getPlacesUseCase;
+    private PlaceQueryService placeQueryService;
 
     @BeforeEach
     void setUp() {
@@ -45,7 +45,7 @@ class GetPlacesUseCaseTest {
                 Place.create("FoodB", "Seoul", "RESTAURANT", null, null, null, "ownerB")
         ));
 
-        List<PlaceResponse> result = getPlacesUseCase.execute(null);
+        List<PlaceResponse> result = placeQueryService.getPlaces(null);
 
         assertThat(result).hasSize(2);
     }
@@ -56,7 +56,7 @@ class GetPlacesUseCaseTest {
                 Place.create("CafeA", "Seoul", "CAFE", null, null, null, "ownerA")
         ));
 
-        List<PlaceResponse> result = getPlacesUseCase.execute("CAFE");
+        List<PlaceResponse> result = placeQueryService.getPlaces("CAFE");
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).category()).isEqualTo("CAFE");

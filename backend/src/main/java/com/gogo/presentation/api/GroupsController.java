@@ -2,7 +2,6 @@ package com.gogo.presentation.api;
 
 import com.gogo.application.dto.*;
 import com.gogo.application.service.GroupService;
-import com.gogo.application.usecase.SharePlaceToGroupUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +14,9 @@ import java.util.List;
 public class GroupsController {
 
     private final GroupService groupService;
-    private final SharePlaceToGroupUseCase sharePlaceToGroupUseCase;
 
-    public GroupsController(GroupService groupService,
-                            SharePlaceToGroupUseCase sharePlaceToGroupUseCase) {
+    public GroupsController(GroupService groupService) {
         this.groupService = groupService;
-        this.sharePlaceToGroupUseCase = sharePlaceToGroupUseCase;
     }
 
     @PostMapping
@@ -42,7 +38,7 @@ public class GroupsController {
     public ResponseEntity<GroupPlaceResponse> sharePlace(@PathVariable Long id,
                                                          @Valid @RequestBody SharePlaceRequest request) {
         SharePlaceRequest withGroupId = new SharePlaceRequest(id, request.placeId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(sharePlaceToGroupUseCase.execute(withGroupId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(groupService.sharePlaceToGroup(withGroupId));
     }
 
     @GetMapping("/{id}/places")

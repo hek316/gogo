@@ -3,7 +3,6 @@ package com.gogo.presentation.api;
 import com.gogo.application.auth.GoogleOAuthClient;
 import com.gogo.application.auth.KakaoOAuthClient;
 import com.gogo.application.service.AuthService;
-import com.gogo.application.usecase.GetCurrentUserUseCase;
 import com.gogo.application.usecase.auth.GoogleLoginUseCase;
 import com.gogo.application.usecase.auth.KakaoLoginUseCase;
 import com.gogo.application.usecase.auth.RefreshTokenUseCase;
@@ -27,7 +26,6 @@ public class AuthController {
     private final GoogleLoginUseCase googleLoginUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final AuthService authService;
-    private final GetCurrentUserUseCase getCurrentUserUseCase;
     private final KakaoOAuthClient kakaoOAuthClient;
     private final GoogleOAuthClient googleOAuthClient;
 
@@ -38,14 +36,12 @@ public class AuthController {
                           GoogleLoginUseCase googleLoginUseCase,
                           RefreshTokenUseCase refreshTokenUseCase,
                           AuthService authService,
-                          GetCurrentUserUseCase getCurrentUserUseCase,
                           KakaoOAuthClient kakaoOAuthClient,
                           GoogleOAuthClient googleOAuthClient) {
         this.kakaoLoginUseCase = kakaoLoginUseCase;
         this.googleLoginUseCase = googleLoginUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
         this.authService = authService;
-        this.getCurrentUserUseCase = getCurrentUserUseCase;
         this.kakaoOAuthClient = kakaoOAuthClient;
         this.googleOAuthClient = googleOAuthClient;
     }
@@ -119,7 +115,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me() {
         try {
-            return ResponseEntity.ok(getCurrentUserUseCase.execute());
+            return ResponseEntity.ok(authService.getCurrentUser());
         } catch (IllegalStateException e) {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         } catch (IllegalArgumentException e) {

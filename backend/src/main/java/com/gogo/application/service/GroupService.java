@@ -5,8 +5,10 @@ import com.gogo.application.dto.GroupPlaceResponse;
 import com.gogo.application.dto.GroupResponse;
 import com.gogo.application.dto.JoinGroupRequest;
 import com.gogo.application.dto.PlaceResponse;
+import com.gogo.application.dto.SharePlaceRequest;
 import com.gogo.application.port.AuthContext;
 import com.gogo.domain.entity.Group;
+import com.gogo.domain.entity.GroupPlace;
 import com.gogo.domain.repository.GroupPlaceRepository;
 import com.gogo.domain.repository.GroupRepository;
 import com.gogo.domain.repository.PlaceRepository;
@@ -63,5 +65,14 @@ public class GroupService {
                         .orElse(null))
                 .filter(r -> r != null)
                 .toList();
+    }
+
+    public GroupPlaceResponse sharePlaceToGroup(SharePlaceRequest request) {
+        String sharedBy = authContext.currentNickname().orElse("anonymous");
+        com.gogo.domain.entity.Place place = placeRepository.findById(request.placeId())
+                .orElseThrow(() -> new IllegalArgumentException("장소를 찾을 수 없습니다. id=" + request.placeId()));
+        GroupPlace groupPlace = GroupPlace.create(request.groupId(), request.placeId(), sharedBy);
+        GroupPlace saved = groupPlaceRepository.save(groupPlace);
+        return GroupPlaceResponse.of(saved, PlaceResponse.from(place));
     }
 }

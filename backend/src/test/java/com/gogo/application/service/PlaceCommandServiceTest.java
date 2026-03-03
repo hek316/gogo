@@ -5,6 +5,7 @@ import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.port.AuthContext;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.entity.PlaceStatus;
+import com.gogo.domain.repository.PlaceLikeRepository;
 import com.gogo.domain.repository.PlaceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,18 +28,17 @@ class PlaceCommandServiceTest {
     private PlaceRepository placeRepository;
 
     @Mock
+    private PlaceLikeRepository placeLikeRepository;
+
+    @Mock
     private AuthContext authContext;
 
     @InjectMocks
     private PlaceCommandService placeCommandService;
 
-    @BeforeEach
-    void setUp() {
-        given(authContext.currentNickname()).willReturn(Optional.of("tester"));
-    }
-
     @Test
     void addPlaceSuccess() {
+        given(authContext.currentNickname()).willReturn(Optional.of("tester"));
         AddPlaceRequest request = new AddPlaceRequest("Cafe", "Seoul", "CAFE", "https://naver.me/xxx", "good", null);
         Place saved = Place.create(request.name(), request.address(), request.category(), request.url(), request.note(), request.imageUrl(), "tester");
         given(placeRepository.save(any(Place.class))).willReturn(saved);
@@ -54,6 +54,26 @@ class PlaceCommandServiceTest {
         AddPlaceRequest request = new AddPlaceRequest("", "Seoul", "CAFE", null, null, null);
 
         assertThatThrownBy(() -> placeCommandService.addPlace(request))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void markVisitedSuccess() {
+        given(authContext.currentUserId()).willReturn(Optional.of(1L));
+        Place place = Place.create("Cafe", "Seoul", "CAFE", null, null, null, "tester");
+        given(placeRepository.findById(1L)).willReturn(Optional.of(place));
+        given(placeRepository.save(any(Place.class))).willReturn(place);
+
+        PlaceResponse response = placeCommandService.markVisited(1L);
+
+        assertThat(response.status()).isEqualTo(PlaceStatus.VISITED);
+    }
+
+    @Test
+    void markVisitedNotFoundThrows() {
+        given(placeRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> placeCommandService.markVisited(999L))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

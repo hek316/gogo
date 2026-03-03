@@ -2,8 +2,6 @@ package com.gogo.presentation.api;
 
 import com.gogo.application.dto.*;
 import com.gogo.application.service.MeetingService;
-import com.gogo.application.usecase.FinalizeMeetingUseCase;
-import com.gogo.application.usecase.VotePlaceUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +11,9 @@ import org.springframework.web.bind.annotation.*;
 public class MeetingsController {
 
     private final MeetingService meetingService;
-    private final VotePlaceUseCase votePlaceUseCase;
-    private final FinalizeMeetingUseCase finalizeMeetingUseCase;
 
-    public MeetingsController(MeetingService meetingService,
-                               VotePlaceUseCase votePlaceUseCase,
-                               FinalizeMeetingUseCase finalizeMeetingUseCase) {
+    public MeetingsController(MeetingService meetingService) {
         this.meetingService = meetingService;
-        this.votePlaceUseCase = votePlaceUseCase;
-        this.finalizeMeetingUseCase = finalizeMeetingUseCase;
     }
 
     // 약속 생성
@@ -43,13 +35,13 @@ public class MeetingsController {
     @PostMapping("/api/meetings/{id}/vote")
     public ResponseEntity<MeetingResponse> vote(@PathVariable Long id,
                                                  @Valid @RequestBody VoteRequest request) {
-        return ResponseEntity.ok(votePlaceUseCase.execute(id, request));
+        return ResponseEntity.ok(meetingService.vote(id, request));
     }
 
     // 약속 확정
     @PostMapping("/api/meetings/{id}/finalize")
     public ResponseEntity<MeetingResponse> finalize(@PathVariable Long id,
                                                      @Valid @RequestBody FinalizeRequest request) {
-        return ResponseEntity.ok(finalizeMeetingUseCase.execute(id, request));
+        return ResponseEntity.ok(meetingService.finalize(id, request));
     }
 }
