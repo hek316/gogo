@@ -1,5 +1,6 @@
 package com.gogo.infrastructure.security;
 
+import com.gogo.application.port.AuthContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -7,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class SecurityContextHelper {
+public class SecurityContextHelper implements AuthContext {
 
     public Optional<Long> currentUserId() {
         return resolveUser().map(AuthenticatedUser::userId);

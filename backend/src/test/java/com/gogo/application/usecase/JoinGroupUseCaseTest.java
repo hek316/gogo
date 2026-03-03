@@ -4,7 +4,7 @@ import com.gogo.application.dto.GroupResponse;
 import com.gogo.application.dto.JoinGroupRequest;
 import com.gogo.domain.entity.Group;
 import com.gogo.domain.repository.GroupRepository;
-import com.gogo.infrastructure.security.SecurityContextHelper;
+import com.gogo.application.port.AuthContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,14 +26,14 @@ class JoinGroupUseCaseTest {
     private GroupRepository groupRepository;
 
     @Mock
-    private SecurityContextHelper securityContextHelper;
+    private AuthContext authContext;
 
     @InjectMocks
     private JoinGroupUseCase joinGroupUseCase;
 
     @BeforeEach
     void setUp() {
-        given(securityContextHelper.currentNickname()).willReturn(Optional.of("joiner"));
+        given(authContext.currentNickname()).willReturn(Optional.of("joiner"));
     }
 
     @Test

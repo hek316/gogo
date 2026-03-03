@@ -1,21 +1,46 @@
 package com.gogo.domain.entity;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "places")
 public class Place {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column
     private String address;
+
+    @Column
     private String category;
+
+    @Column
     private String url;
+
+    @Column(columnDefinition = "TEXT")
     private String note;
+
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PlaceStatus status;
+
+    @Column(nullable = false)
     private String createdBy;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    private Place() {}
+    protected Place() {}
 
     public static Place create(String name, String address, String category, String url, String note, String imageUrl, String createdBy) {
         validate(name);

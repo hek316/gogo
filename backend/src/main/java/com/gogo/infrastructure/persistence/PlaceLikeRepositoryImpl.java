@@ -2,7 +2,6 @@ package com.gogo.infrastructure.persistence;
 
 import com.gogo.domain.entity.PlaceLike;
 import com.gogo.domain.repository.PlaceLikeRepository;
-import com.gogo.infrastructure.persistence.entity.PlaceLikeJpaEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +18,7 @@ public class PlaceLikeRepositoryImpl implements PlaceLikeRepository {
 
     @Override
     public PlaceLike save(PlaceLike like) {
-        PlaceLikeJpaEntity entity = new PlaceLikeJpaEntity(
-                like.getId(), like.getUserId(), like.getPlaceId(), like.getCreatedAt()
-        );
-        PlaceLikeJpaEntity saved = jpa.save(entity);
-        return PlaceLike.reconstruct(saved.getId(), saved.getUserId(), saved.getPlaceId(), saved.getCreatedAt());
+        return jpa.save(like);
     }
 
     @Override
@@ -34,8 +29,7 @@ public class PlaceLikeRepositoryImpl implements PlaceLikeRepository {
 
     @Override
     public Optional<PlaceLike> findByUserIdAndPlaceId(Long userId, Long placeId) {
-        return jpa.findByUserIdAndPlaceId(userId, placeId)
-                .map(e -> PlaceLike.reconstruct(e.getId(), e.getUserId(), e.getPlaceId(), e.getCreatedAt()));
+        return jpa.findByUserIdAndPlaceId(userId, placeId);
     }
 
     @Override

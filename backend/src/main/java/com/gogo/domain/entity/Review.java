@@ -1,19 +1,36 @@
 package com.gogo.domain.entity;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "reviews")
 public class Review {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private Long placeId;
+
+    @Column(nullable = false)
     private String authorName;
+
+    @Column(nullable = false)
     private int rating;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
+
     private LocalDate visitedAt;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    private Review() {}
+    protected Review() {}
 
     public static Review create(Long placeId, String authorName, int rating, String content, LocalDate visitedAt) {
         validate(rating);

@@ -4,7 +4,7 @@ import com.gogo.application.dto.PlaceResponse;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.PlaceLikeRepository;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.SecurityContextHelper;
+import com.gogo.application.port.AuthContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,14 +28,14 @@ class GetPlacesUseCaseTest {
     private PlaceLikeRepository placeLikeRepository;
 
     @Mock
-    private SecurityContextHelper securityContextHelper;
+    private AuthContext authContext;
 
     @InjectMocks
     private GetPlacesUseCase getPlacesUseCase;
 
     @BeforeEach
     void setUp() {
-        given(securityContextHelper.currentUserId()).willReturn(Optional.of(1L));
+        given(authContext.currentUserId()).willReturn(Optional.of(1L));
     }
 
     @Test

@@ -1,15 +1,28 @@
 package com.gogo.domain.entity;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "place_likes",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "place_id"}))
 public class PlaceLike {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    @Column(name = "place_id", nullable = false)
     private Long placeId;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    private PlaceLike() {}
+    protected PlaceLike() {}
 
     public static PlaceLike create(Long userId, Long placeId) {
         PlaceLike like = new PlaceLike();

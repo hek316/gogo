@@ -5,7 +5,7 @@ import com.gogo.application.dto.PlaceResponse;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.entity.PlaceStatus;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.SecurityContextHelper;
+import com.gogo.application.port.AuthContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,14 +27,14 @@ class AddPlaceUseCaseTest {
     private PlaceRepository placeRepository;
 
     @Mock
-    private SecurityContextHelper securityContextHelper;
+    private AuthContext authContext;
 
     @InjectMocks
     private AddPlaceUseCase addPlaceUseCase;
 
     @BeforeEach
     void setUp() {
-        given(securityContextHelper.currentNickname()).willReturn(Optional.of("tester"));
+        given(authContext.currentNickname()).willReturn(Optional.of("tester"));
     }
 
     @Test

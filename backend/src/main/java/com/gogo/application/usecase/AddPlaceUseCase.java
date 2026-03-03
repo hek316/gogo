@@ -4,7 +4,7 @@ import com.gogo.application.dto.AddPlaceRequest;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.SecurityContextHelper;
+import com.gogo.application.port.AuthContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,15 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class AddPlaceUseCase {
 
     private final PlaceRepository placeRepository;
-    private final SecurityContextHelper securityContextHelper;
+    private final AuthContext authContext;
 
-    public AddPlaceUseCase(PlaceRepository placeRepository, SecurityContextHelper securityContextHelper) {
+    public AddPlaceUseCase(PlaceRepository placeRepository, AuthContext authContext) {
         this.placeRepository = placeRepository;
-        this.securityContextHelper = securityContextHelper;
+        this.authContext = authContext;
     }
 
     public PlaceResponse execute(AddPlaceRequest request) {
-        String nickname = securityContextHelper.currentNickname().orElse("anonymous");
+        String nickname = authContext.currentNickname().orElse("anonymous");
         Place place = Place.create(
                 request.name(),
                 request.address(),

@@ -6,7 +6,7 @@ import com.gogo.domain.entity.GroupPlace;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.GroupPlaceRepository;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.infrastructure.security.SecurityContextHelper;
+import com.gogo.application.port.AuthContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,14 +31,14 @@ class SharePlaceToGroupUseCaseTest {
     private GroupPlaceRepository groupPlaceRepository;
 
     @Mock
-    private SecurityContextHelper securityContextHelper;
+    private AuthContext authContext;
 
     @InjectMocks
     private SharePlaceToGroupUseCase sharePlaceToGroupUseCase;
 
     @BeforeEach
     void setUp() {
-        given(securityContextHelper.currentNickname()).willReturn(Optional.of("tester"));
+        given(authContext.currentNickname()).willReturn(Optional.of("tester"));
     }
 
     @Test

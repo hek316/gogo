@@ -2,12 +2,11 @@ package com.gogo.presentation.api;
 
 import com.gogo.application.auth.GoogleOAuthClient;
 import com.gogo.application.auth.KakaoOAuthClient;
+import com.gogo.application.usecase.GetCurrentUserUseCase;
 import com.gogo.application.usecase.auth.GoogleLoginUseCase;
 import com.gogo.application.usecase.auth.KakaoLoginUseCase;
 import com.gogo.application.usecase.auth.LogoutUseCase;
 import com.gogo.application.usecase.auth.RefreshTokenUseCase;
-import com.gogo.domain.entity.User;
-import com.gogo.domain.repository.UserRepository;
 import com.gogo.infrastructure.security.AuthenticatedUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -29,7 +27,7 @@ public class AuthController {
     private final GoogleLoginUseCase googleLoginUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
-    private final UserRepository userRepository;
+    private final GetCurrentUserUseCase getCurrentUserUseCase;
     private final KakaoOAuthClient kakaoOAuthClient;
     private final GoogleOAuthClient googleOAuthClient;
 
@@ -40,14 +38,14 @@ public class AuthController {
                           GoogleLoginUseCase googleLoginUseCase,
                           RefreshTokenUseCase refreshTokenUseCase,
                           LogoutUseCase logoutUseCase,
-                          UserRepository userRepository,
+                          GetCurrentUserUseCase getCurrentUserUseCase,
                           KakaoOAuthClient kakaoOAuthClient,
                           GoogleOAuthClient googleOAuthClient) {
         this.kakaoLoginUseCase = kakaoLoginUseCase;
         this.googleLoginUseCase = googleLoginUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
         this.logoutUseCase = logoutUseCase;
-        this.userRepository = userRepository;
+        this.getCurrentUserUseCase = getCurrentUserUseCase;
         this.kakaoOAuthClient = kakaoOAuthClient;
         this.googleOAuthClient = googleOAuthClient;
     }
@@ -119,20 +117,14 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(@AuthenticationPrincipal AuthenticatedUser principal) {
-        if (principal == null) {
-            return ResponseEntity.status(401).body(Map.of("error", "인증이 필요합니다."));
+    public ResponseEntity<?> me() {
+        try {
+            return ResponseEntity.ok(getCurrentUserUseCase.execute());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         }
-        Optional<User> user = userRepository.findById(principal.userId());
-        if (user.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of("error", "사용자를 찾을 수 없습니다."));
-        }
-        User u = user.get();
-        return ResponseEntity.ok(Map.of(
-                "id", u.getId(),
-                "nickname", u.getNickname(),
-                "profileImageUrl", u.getProfileImageUrl() != null ? u.getProfileImageUrl() : ""
-        ));
     }
 
     private String extractCookie(HttpServletRequest request, String name) {

@@ -1,7 +1,7 @@
 package com.gogo.infrastructure.persistence;
 
+import com.gogo.domain.entity.Place;
 import com.gogo.domain.entity.PlaceStatus;
-import com.gogo.infrastructure.persistence.entity.PlaceJpaEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface PlaceJpaRepository extends JpaRepository<PlaceJpaEntity, Long> {
-    List<PlaceJpaEntity> findByCategory(String category);
-    List<PlaceJpaEntity> findByStatus(PlaceStatus status);
+public interface PlaceJpaRepository extends JpaRepository<Place, Long> {
+    List<Place> findByCategory(String category);
+    List<Place> findByStatus(PlaceStatus status);
 
     @Query(value = "SELECT p.* FROM places p " +
             "LEFT JOIN group_places gp ON gp.place_id = p.id " +
@@ -20,7 +20,7 @@ public interface PlaceJpaRepository extends JpaRepository<PlaceJpaEntity, Long> 
             "ORDER BY (COUNT(DISTINCT gp.id) + COUNT(DISTINCT pl.id) * 0.5) DESC, p.created_at DESC " +
             "LIMIT :limit",
             nativeQuery = true)
-    List<PlaceJpaEntity> findPopularPlaces(@Param("limit") int limit);
+    List<Place> findPopularPlaces(@Param("limit") int limit);
 
-    List<PlaceJpaEntity> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    List<Place> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

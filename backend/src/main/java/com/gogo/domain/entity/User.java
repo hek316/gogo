@@ -1,17 +1,35 @@
 package com.gogo.domain.entity;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "users",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"kakao_id", "provider"}))
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "kakao_id", nullable = false)
     private String oauthId;
+
+    @Column(nullable = false)
     private String nickname;
+
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OAuthProvider provider;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    private User() {}
+    protected User() {}
 
     public static User create(String oauthId, String nickname, String profileImageUrl, OAuthProvider provider) {
         User user = new User();

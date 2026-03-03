@@ -4,7 +4,7 @@ import com.gogo.application.dto.CreateGroupRequest;
 import com.gogo.application.dto.GroupResponse;
 import com.gogo.domain.entity.Group;
 import com.gogo.domain.repository.GroupRepository;
-import com.gogo.infrastructure.security.SecurityContextHelper;
+import com.gogo.application.port.AuthContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,15 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateGroupUseCase {
 
     private final GroupRepository groupRepository;
-    private final SecurityContextHelper securityContextHelper;
+    private final AuthContext authContext;
 
-    public CreateGroupUseCase(GroupRepository groupRepository, SecurityContextHelper securityContextHelper) {
+    public CreateGroupUseCase(GroupRepository groupRepository, AuthContext authContext) {
         this.groupRepository = groupRepository;
-        this.securityContextHelper = securityContextHelper;
+        this.authContext = authContext;
     }
 
     public GroupResponse execute(CreateGroupRequest request) {
-        String nickname = securityContextHelper.currentNickname().orElse("anonymous");
+        String nickname = authContext.currentNickname().orElse("anonymous");
         Group group = Group.create(request.name(), nickname);
         return GroupResponse.from(groupRepository.save(group));
     }
