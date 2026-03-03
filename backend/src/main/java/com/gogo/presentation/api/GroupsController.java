@@ -1,10 +1,7 @@
 package com.gogo.presentation.api;
 
 import com.gogo.application.dto.*;
-import com.gogo.application.service.GroupQueryService;
-import com.gogo.application.usecase.CreateGroupUseCase;
-import com.gogo.application.usecase.GetGroupPlacesUseCase;
-import com.gogo.application.usecase.JoinGroupUseCase;
+import com.gogo.application.service.GroupService;
 import com.gogo.application.usecase.SharePlaceToGroupUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,37 +14,28 @@ import java.util.List;
 @RequestMapping("/api/groups")
 public class GroupsController {
 
-    private final CreateGroupUseCase createGroupUseCase;
-    private final JoinGroupUseCase joinGroupUseCase;
-    private final GroupQueryService groupQueryService;
+    private final GroupService groupService;
     private final SharePlaceToGroupUseCase sharePlaceToGroupUseCase;
-    private final GetGroupPlacesUseCase getGroupPlacesUseCase;
 
-    public GroupsController(CreateGroupUseCase createGroupUseCase,
-                            JoinGroupUseCase joinGroupUseCase,
-                            GroupQueryService groupQueryService,
-                            SharePlaceToGroupUseCase sharePlaceToGroupUseCase,
-                            GetGroupPlacesUseCase getGroupPlacesUseCase) {
-        this.createGroupUseCase = createGroupUseCase;
-        this.joinGroupUseCase = joinGroupUseCase;
-        this.groupQueryService = groupQueryService;
+    public GroupsController(GroupService groupService,
+                            SharePlaceToGroupUseCase sharePlaceToGroupUseCase) {
+        this.groupService = groupService;
         this.sharePlaceToGroupUseCase = sharePlaceToGroupUseCase;
-        this.getGroupPlacesUseCase = getGroupPlacesUseCase;
     }
 
     @PostMapping
     public ResponseEntity<GroupResponse> createGroup(@Valid @RequestBody CreateGroupRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(createGroupUseCase.execute(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(groupService.createGroup(request));
     }
 
     @PostMapping("/join")
     public ResponseEntity<GroupResponse> joinGroup(@Valid @RequestBody JoinGroupRequest request) {
-        return ResponseEntity.ok(joinGroupUseCase.execute(request));
+        return ResponseEntity.ok(groupService.joinGroup(request));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<GroupResponse> getGroup(@PathVariable Long id) {
-        return ResponseEntity.ok(groupQueryService.getGroup(id));
+        return ResponseEntity.ok(groupService.getGroup(id));
     }
 
     @PostMapping("/{id}/places")
@@ -59,6 +47,6 @@ public class GroupsController {
 
     @GetMapping("/{id}/places")
     public ResponseEntity<List<GroupPlaceResponse>> getGroupPlaces(@PathVariable Long id) {
-        return ResponseEntity.ok(getGroupPlacesUseCase.execute(id));
+        return ResponseEntity.ok(groupService.getGroupPlaces(id));
     }
 }

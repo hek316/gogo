@@ -1,11 +1,11 @@
-package com.gogo.application.usecase;
+package com.gogo.application.service;
 
 import com.gogo.application.dto.AddPlaceRequest;
 import com.gogo.application.dto.PlaceResponse;
+import com.gogo.application.port.AuthContext;
 import com.gogo.domain.entity.Place;
 import com.gogo.domain.entity.PlaceStatus;
 import com.gogo.domain.repository.PlaceRepository;
-import com.gogo.application.port.AuthContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class AddPlaceUseCaseTest {
+class PlaceCommandServiceTest {
 
     @Mock
     private PlaceRepository placeRepository;
@@ -30,7 +30,7 @@ class AddPlaceUseCaseTest {
     private AuthContext authContext;
 
     @InjectMocks
-    private AddPlaceUseCase addPlaceUseCase;
+    private PlaceCommandService placeCommandService;
 
     @BeforeEach
     void setUp() {
@@ -43,7 +43,7 @@ class AddPlaceUseCaseTest {
         Place saved = Place.create(request.name(), request.address(), request.category(), request.url(), request.note(), request.imageUrl(), "tester");
         given(placeRepository.save(any(Place.class))).willReturn(saved);
 
-        PlaceResponse response = addPlaceUseCase.execute(request);
+        PlaceResponse response = placeCommandService.addPlace(request);
 
         assertThat(response.name()).isEqualTo("Cafe");
         assertThat(response.status()).isEqualTo(PlaceStatus.WANT_TO_GO);
@@ -53,7 +53,7 @@ class AddPlaceUseCaseTest {
     void addPlaceWithoutNameThrows() {
         AddPlaceRequest request = new AddPlaceRequest("", "Seoul", "CAFE", null, null, null);
 
-        assertThatThrownBy(() -> addPlaceUseCase.execute(request))
+        assertThatThrownBy(() -> placeCommandService.addPlace(request))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

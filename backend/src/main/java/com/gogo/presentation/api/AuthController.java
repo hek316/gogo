@@ -2,10 +2,10 @@ package com.gogo.presentation.api;
 
 import com.gogo.application.auth.GoogleOAuthClient;
 import com.gogo.application.auth.KakaoOAuthClient;
+import com.gogo.application.service.AuthService;
 import com.gogo.application.usecase.GetCurrentUserUseCase;
 import com.gogo.application.usecase.auth.GoogleLoginUseCase;
 import com.gogo.application.usecase.auth.KakaoLoginUseCase;
-import com.gogo.application.usecase.auth.LogoutUseCase;
 import com.gogo.application.usecase.auth.RefreshTokenUseCase;
 import com.gogo.infrastructure.security.AuthenticatedUser;
 import jakarta.servlet.http.Cookie;
@@ -26,7 +26,7 @@ public class AuthController {
     private final KakaoLoginUseCase kakaoLoginUseCase;
     private final GoogleLoginUseCase googleLoginUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
-    private final LogoutUseCase logoutUseCase;
+    private final AuthService authService;
     private final GetCurrentUserUseCase getCurrentUserUseCase;
     private final KakaoOAuthClient kakaoOAuthClient;
     private final GoogleOAuthClient googleOAuthClient;
@@ -37,14 +37,14 @@ public class AuthController {
     public AuthController(KakaoLoginUseCase kakaoLoginUseCase,
                           GoogleLoginUseCase googleLoginUseCase,
                           RefreshTokenUseCase refreshTokenUseCase,
-                          LogoutUseCase logoutUseCase,
+                          AuthService authService,
                           GetCurrentUserUseCase getCurrentUserUseCase,
                           KakaoOAuthClient kakaoOAuthClient,
                           GoogleOAuthClient googleOAuthClient) {
         this.kakaoLoginUseCase = kakaoLoginUseCase;
         this.googleLoginUseCase = googleLoginUseCase;
         this.refreshTokenUseCase = refreshTokenUseCase;
-        this.logoutUseCase = logoutUseCase;
+        this.authService = authService;
         this.getCurrentUserUseCase = getCurrentUserUseCase;
         this.kakaoOAuthClient = kakaoOAuthClient;
         this.googleOAuthClient = googleOAuthClient;
@@ -110,7 +110,7 @@ public class AuthController {
     public ResponseEntity<?> logout(@AuthenticationPrincipal AuthenticatedUser principal,
                                     HttpServletResponse response) {
         if (principal != null) {
-            logoutUseCase.execute(principal.userId());
+            authService.logout(principal.userId());
         }
         clearCookies(response);
         return ResponseEntity.ok(Map.of("message", "로그아웃 되었습니다."));

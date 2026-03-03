@@ -5,9 +5,8 @@ import com.gogo.application.dto.PlacePreviewResponse;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.dto.PlaceSearchResult;
 import com.gogo.application.service.PlaceCommandService;
+import com.gogo.application.service.PlaceLikeService;
 import com.gogo.application.usecase.*;
-import com.gogo.application.usecase.LikePlaceUseCase;
-import com.gogo.application.usecase.UnlikePlaceUseCase;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import java.util.List;
 public class PlacesController {
     private static final Logger log = LoggerFactory.getLogger(PlacesController.class);
 
-    private final AddPlaceUseCase addPlaceUseCase;
     private final GetPlacesUseCase getPlacesUseCase;
     private final GetPlaceUseCase getPlaceUseCase;
     private final PlaceCommandService placeCommandService;
@@ -31,11 +29,9 @@ public class PlacesController {
     private final GetRecentPlacesUseCase getRecentPlacesUseCase;
     private final FetchPlacePreviewUseCase fetchPlacePreviewUseCase;
     private final SearchPlacesUseCase searchPlacesUseCase;
-    private final LikePlaceUseCase likePlaceUseCase;
-    private final UnlikePlaceUseCase unlikePlaceUseCase;
+    private final PlaceLikeService placeLikeService;
 
-    public PlacesController(AddPlaceUseCase addPlaceUseCase,
-                            GetPlacesUseCase getPlacesUseCase,
+    public PlacesController(GetPlacesUseCase getPlacesUseCase,
                             GetPlaceUseCase getPlaceUseCase,
                             PlaceCommandService placeCommandService,
                             MarkPlaceVisitedUseCase markPlaceVisitedUseCase,
@@ -43,9 +39,7 @@ public class PlacesController {
                             GetRecentPlacesUseCase getRecentPlacesUseCase,
                             FetchPlacePreviewUseCase fetchPlacePreviewUseCase,
                             SearchPlacesUseCase searchPlacesUseCase,
-                            LikePlaceUseCase likePlaceUseCase,
-                            UnlikePlaceUseCase unlikePlaceUseCase) {
-        this.addPlaceUseCase = addPlaceUseCase;
+                            PlaceLikeService placeLikeService) {
         this.getPlacesUseCase = getPlacesUseCase;
         this.getPlaceUseCase = getPlaceUseCase;
         this.placeCommandService = placeCommandService;
@@ -54,13 +48,12 @@ public class PlacesController {
         this.getRecentPlacesUseCase = getRecentPlacesUseCase;
         this.fetchPlacePreviewUseCase = fetchPlacePreviewUseCase;
         this.searchPlacesUseCase = searchPlacesUseCase;
-        this.likePlaceUseCase = likePlaceUseCase;
-        this.unlikePlaceUseCase = unlikePlaceUseCase;
+        this.placeLikeService = placeLikeService;
     }
 
     @PostMapping
     public ResponseEntity<PlaceResponse> addPlace(@Valid @RequestBody AddPlaceRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(addPlaceUseCase.execute(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(placeCommandService.addPlace(request));
     }
 
     @GetMapping
@@ -109,13 +102,13 @@ public class PlacesController {
 
     @PostMapping("/{id}/like")
     public ResponseEntity<Void> likePlace(@PathVariable Long id) {
-        likePlaceUseCase.execute(id);
+        placeLikeService.like(id);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}/like")
     public ResponseEntity<Void> unlikePlace(@PathVariable Long id) {
-        unlikePlaceUseCase.execute(id);
+        placeLikeService.unlike(id);
         return ResponseEntity.noContent().build();
     }
 }

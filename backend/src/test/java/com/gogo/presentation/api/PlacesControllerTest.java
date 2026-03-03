@@ -3,16 +3,14 @@ package com.gogo.presentation.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gogo.application.dto.PlaceResponse;
 import com.gogo.application.service.PlaceCommandService;
-import com.gogo.application.usecase.AddPlaceUseCase;
+import com.gogo.application.service.PlaceLikeService;
 import com.gogo.application.usecase.FetchPlacePreviewUseCase;
 import com.gogo.application.usecase.GetPlaceUseCase;
 import com.gogo.application.usecase.GetPlacesUseCase;
 import com.gogo.application.usecase.GetPopularPlacesUseCase;
 import com.gogo.application.usecase.GetRecentPlacesUseCase;
-import com.gogo.application.usecase.LikePlaceUseCase;
 import com.gogo.application.usecase.MarkPlaceVisitedUseCase;
 import com.gogo.application.usecase.SearchPlacesUseCase;
-import com.gogo.application.usecase.UnlikePlaceUseCase;
 import com.gogo.domain.entity.PlaceStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +41,6 @@ class PlacesControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private AddPlaceUseCase addPlaceUseCase;
-
-    @MockitoBean
     private GetPlacesUseCase getPlacesUseCase;
 
     @MockitoBean
@@ -70,16 +65,13 @@ class PlacesControllerTest {
     private SearchPlacesUseCase searchPlacesUseCase;
 
     @MockitoBean
-    private LikePlaceUseCase likePlaceUseCase;
-
-    @MockitoBean
-    private UnlikePlaceUseCase unlikePlaceUseCase;
+    private PlaceLikeService placeLikeService;
 
     @Test
     @WithMockUser
     void POST_api_places_성공() throws Exception {
         PlaceResponse response = new PlaceResponse(1L, "성수동 카페", "서울 성동구", "CAFE", null, null, null, PlaceStatus.WANT_TO_GO, "홍길동", LocalDateTime.now(), 0, false);
-        given(addPlaceUseCase.execute(any())).willReturn(response);
+        given(placeCommandService.addPlace(any())).willReturn(response);
 
         mockMvc.perform(post("/api/places")
                         .with(csrf())
