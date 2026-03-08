@@ -20,20 +20,7 @@ public record PlaceResponse(
         boolean isLiked
 ) {
     public static PlaceResponse from(Place place) {
-        return new PlaceResponse(
-                place.getId(),
-                place.getName(),
-                place.getAddress(),
-                place.getCategory(),
-                place.getUrl(),
-                place.getNote(),
-                place.getImageUrl(),
-                place.getStatus(),
-                place.getCreatedBy(),
-                place.getCreatedAt(),
-                0,
-                false
-        );
+        return from(place, 0, false);
     }
 
     public static PlaceResponse from(Place place, int likeCount, boolean isLiked) {

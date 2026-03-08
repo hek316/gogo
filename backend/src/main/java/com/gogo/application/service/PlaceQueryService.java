@@ -29,39 +29,30 @@ public class PlaceQueryService {
     public PlaceResponse getPlace(Long id) {
         Place place = placeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("장소를 찾을 수 없습니다. id=" + id));
-        Long userId = authContext.currentUserId().orElse(null);
-        return PlaceResponse.from(place,
-                placeLikeRepository.countByPlaceId(id),
-                userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, id));
+        return toResponse(place);
     }
 
     public List<PlaceResponse> getPlaces(String category) {
-        Long userId = authContext.currentUserId().orElse(null);
         List<Place> places = (category != null && !category.isBlank())
                 ? placeRepository.findByCategory(category)
                 : placeRepository.findAll();
-        return places.stream()
-                .map(p -> PlaceResponse.from(p,
-                        placeLikeRepository.countByPlaceId(p.getId()),
-                        userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, p.getId())))
-                .toList();
+        return places.stream().map(this::toResponse).toList();
     }
 
     public List<PlaceResponse> getPopularPlaces(int limit) {
-        Long userId = authContext.currentUserId().orElse(null);
         return placeRepository.findPopularPlaces(limit).stream()
-                .map(p -> PlaceResponse.from(p,
-                        placeLikeRepository.countByPlaceId(p.getId()),
-                        userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, p.getId())))
-                .toList();
+                .map(this::toResponse).toList();
     }
 
     public List<PlaceResponse> getRecent(int limit) {
-        Long userId = authContext.currentUserId().orElse(null);
         return placeRepository.findRecent(limit).stream()
-                .map(p -> PlaceResponse.from(p,
-                        placeLikeRepository.countByPlaceId(p.getId()),
-                        userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, p.getId())))
-                .toList();
+                .map(this::toResponse).toList();
+    }
+
+    PlaceResponse toResponse(Place place) {
+        Long userId = authContext.currentUserId().orElse(null);
+        return PlaceResponse.from(place,
+                placeLikeRepository.countByPlaceId(place.getId()),
+                userId != null && placeLikeRepository.existsByUserIdAndPlaceId(userId, place.getId()));
     }
 }

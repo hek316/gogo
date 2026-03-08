@@ -4,3 +4,15 @@ export const API_BASE =
   typeof window === 'undefined'
     ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080')
     : '/api/proxy';
+
+export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `API 요청 실패: ${res.status}`);
+  }
+  return res.json();
+}

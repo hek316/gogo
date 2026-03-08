@@ -44,13 +44,13 @@ public class GroupService {
     }
 
     public GroupResponse createGroup(CreateGroupRequest request) {
-        String nickname = authContext.currentNickname().orElse("anonymous");
+        String nickname = authContext.requireNickname();
         Group group = Group.create(request.name(), nickname);
         return GroupResponse.from(groupRepository.save(group));
     }
 
     public GroupResponse joinGroup(JoinGroupRequest request) {
-        String nickname = authContext.currentNickname().orElse("anonymous");
+        String nickname = authContext.requireNickname();
         Group group = groupRepository.findByInviteCode(request.inviteCode())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 초대 코드입니다."));
         group.addMember(nickname);
@@ -68,7 +68,7 @@ public class GroupService {
     }
 
     public GroupPlaceResponse sharePlaceToGroup(SharePlaceRequest request) {
-        String sharedBy = authContext.currentNickname().orElse("anonymous");
+        String sharedBy = authContext.requireNickname();
         com.gogo.domain.entity.Place place = placeRepository.findById(request.placeId())
                 .orElseThrow(() -> new IllegalArgumentException("장소를 찾을 수 없습니다. id=" + request.placeId()));
         GroupPlace groupPlace = GroupPlace.create(request.groupId(), request.placeId(), sharedBy);

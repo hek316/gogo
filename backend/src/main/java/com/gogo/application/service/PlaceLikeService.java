@@ -19,16 +19,14 @@ public class PlaceLikeService {
     }
 
     public void like(Long placeId) {
-        Long userId = authContext.currentUserId()
-                .orElseThrow(() -> new IllegalStateException("인증 정보가 없습니다."));
+        Long userId = authContext.requireUserId();
         if (!placeLikeRepository.existsByUserIdAndPlaceId(userId, placeId)) {
             placeLikeRepository.save(PlaceLike.create(userId, placeId));
         }
     }
 
     public void unlike(Long placeId) {
-        Long userId = authContext.currentUserId()
-                .orElseThrow(() -> new IllegalStateException("인증 정보가 없습니다."));
+        Long userId = authContext.requireUserId();
         placeLikeRepository.delete(userId, placeId);
     }
 }

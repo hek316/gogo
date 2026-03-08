@@ -15,12 +15,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final int ACCESS_TOKEN_MAX_AGE = 15 * 60;           // 15 minutes
+    private static final int REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
 
     private final KakaoLoginUseCase kakaoLoginUseCase;
     private final GoogleLoginUseCase googleLoginUseCase;
@@ -48,40 +54,22 @@ public class AuthController {
 
     @GetMapping("/kakao/authorize")
     public void authorize(HttpServletResponse response) throws Exception {
-        String redirectUrl = kakaoOAuthClient.buildAuthorizationUrl();
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect(kakaoOAuthClient.buildAuthorizationUrl());
     }
 
     @GetMapping("/kakao/callback")
-    public void callback(@RequestParam String code, HttpServletResponse response) throws Exception {
-        try {
-            KakaoLoginUseCase.TokenPair tokens = kakaoLoginUseCase.execute(code);
-            String redirectUrl = frontendUrl + "/auth/callback"
-                    + "?at=" + tokens.accessToken()
-                    + "&rt=" + tokens.refreshToken();
-            response.sendRedirect(redirectUrl);
-        } catch (Exception e) {
-            response.sendRedirect(frontendUrl + "/auth/error?message=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
-        }
+    public void callback(@RequestParam String code, HttpServletResponse response) {
+        handleOAuthCallback(code, response, kakaoLoginUseCase::execute);
     }
 
     @GetMapping("/google/authorize")
     public void googleAuthorize(HttpServletResponse response) throws Exception {
-        String redirectUrl = googleOAuthClient.buildAuthorizationUrl();
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect(googleOAuthClient.buildAuthorizationUrl());
     }
 
     @GetMapping("/google/callback")
-    public void googleCallback(@RequestParam String code, HttpServletResponse response) throws Exception {
-        try {
-            KakaoLoginUseCase.TokenPair tokens = googleLoginUseCase.execute(code);
-            String redirectUrl = frontendUrl + "/auth/callback"
-                    + "?at=" + tokens.accessToken()
-                    + "&rt=" + tokens.refreshToken();
-            response.sendRedirect(redirectUrl);
-        } catch (Exception e) {
-            response.sendRedirect(frontendUrl + "/auth/error?message=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
-        }
+    public void googleCallback(@RequestParam String code, HttpServletResponse response) {
+        handleOAuthCallback(code, response, googleLoginUseCase::execute);
     }
 
     @PostMapping("/refresh")
@@ -93,8 +81,8 @@ public class AuthController {
 
         try {
             KakaoLoginUseCase.TokenPair tokens = refreshTokenUseCase.execute(refreshToken);
-            setAccessTokenCookie(response, tokens.accessToken());
-            setRefreshTokenCookie(response, tokens.refreshToken());
+            addTokenCookie(response, "access-token", tokens.accessToken(), "/", ACCESS_TOKEN_MAX_AGE);
+            addTokenCookie(response, "refresh-token", tokens.refreshToken(), "/api/auth", REFRESH_TOKEN_MAX_AGE);
             return ResponseEntity.ok(Map.of("message", "토큰이 갱신되었습니다."));
         } catch (IllegalArgumentException e) {
             clearCookies(response);
@@ -123,6 +111,23 @@ public class AuthController {
         }
     }
 
+    private void handleOAuthCallback(String code, HttpServletResponse response,
+                                     Function<String, KakaoLoginUseCase.TokenPair> loginFn) {
+        try {
+            KakaoLoginUseCase.TokenPair tokens = loginFn.apply(code);
+            String redirectUrl = frontendUrl + "/auth/callback"
+                    + "?at=" + tokens.accessToken()
+                    + "&rt=" + tokens.refreshToken();
+            response.sendRedirect(redirectUrl);
+        } catch (Exception e) {
+            try {
+                response.sendRedirect(frontendUrl + "/auth/error?message="
+                        + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8));
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
     private String extractCookie(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) return null;
@@ -133,37 +138,18 @@ public class AuthController {
                 .orElse(null);
     }
 
-    private void setAccessTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("access-token", token);
+    private void addTokenCookie(HttpServletResponse response, String name, String value,
+                                String path, int maxAge) {
+        Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(15 * 60); // 15 minutes
-        response.addCookie(cookie);
-    }
-
-    private void setRefreshTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("refresh-token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/api/auth");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+        cookie.setPath(path);
+        cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
     }
 
     private void clearCookies(HttpServletResponse response) {
-        Cookie accessCookie = new Cookie("access-token", "");
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(0);
-        response.addCookie(accessCookie);
-
-        Cookie refreshCookie = new Cookie("refresh-token", "");
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
-        refreshCookie.setPath("/api/auth");
-        refreshCookie.setMaxAge(0);
-        response.addCookie(refreshCookie);
+        addTokenCookie(response, "access-token", "", "/", 0);
+        addTokenCookie(response, "refresh-token", "", "/api/auth", 0);
     }
 }

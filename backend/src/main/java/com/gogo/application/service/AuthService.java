@@ -7,8 +7,6 @@ import com.gogo.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 @Service
 @Transactional
 public class AuthService {
@@ -30,15 +28,16 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getCurrentUser() {
-        Long userId = authContext.currentUserId()
-                .orElseThrow(() -> new IllegalStateException("인증이 필요합니다."));
+    public CurrentUserResponse getCurrentUser() {
+        Long userId = authContext.requireUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        return Map.of(
-                "id", user.getId(),
-                "nickname", user.getNickname(),
-                "profileImageUrl", user.getProfileImageUrl() != null ? user.getProfileImageUrl() : ""
+        return new CurrentUserResponse(
+                user.getId(),
+                user.getNickname(),
+                user.getProfileImageUrl() != null ? user.getProfileImageUrl() : ""
         );
     }
+
+    public record CurrentUserResponse(Long id, String nickname, String profileImageUrl) {}
 }

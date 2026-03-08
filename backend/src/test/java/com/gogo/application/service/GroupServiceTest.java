@@ -12,7 +12,6 @@ import com.gogo.domain.entity.Place;
 import com.gogo.domain.repository.GroupPlaceRepository;
 import com.gogo.domain.repository.GroupRepository;
 import com.gogo.domain.repository.PlaceRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,13 +43,9 @@ class GroupServiceTest {
     @InjectMocks
     private GroupService groupService;
 
-    @BeforeEach
-    void setUp() {
-        given(authContext.currentNickname()).willReturn(Optional.of("tester"));
-    }
-
     @Test
     void createGroupGeneratesInviteCode() {
+        given(authContext.requireNickname()).willReturn("tester");
         Group group = Group.create("test-group", "tester");
         given(groupRepository.save(any())).willReturn(group);
 
@@ -68,7 +63,7 @@ class GroupServiceTest {
 
     @Test
     void joinWithValidInviteCode() {
-        given(authContext.currentNickname()).willReturn(Optional.of("joiner"));
+        given(authContext.requireNickname()).willReturn("joiner");
         Group group = Group.create("test-group", "owner");
         given(groupRepository.findByInviteCode(group.getInviteCode())).willReturn(Optional.of(group));
         given(groupRepository.save(any())).willReturn(group);
@@ -89,6 +84,7 @@ class GroupServiceTest {
 
     @Test
     void sharePlaceToGroupSuccess() {
+        given(authContext.requireNickname()).willReturn("tester");
         Place place = Place.create("Cafe", "Seoul", "CAFE", null, null, null, "tester");
         given(placeRepository.findById(1L)).willReturn(Optional.of(place));
         GroupPlace saved = GroupPlace.create(1L, 1L, "tester");

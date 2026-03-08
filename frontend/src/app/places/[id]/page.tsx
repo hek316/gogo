@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getPlaces, markVisited, Place } from '@/lib/api/places';
+import { getPlace, markVisited, Place } from '@/lib/api/places';
 import { getReviews, addReview, Review } from '@/lib/api/reviews';
 import { ChevronLeft, Inbox, ExternalLink } from 'lucide-react';
+import { CATEGORY_GRADIENT } from '@/lib/constants/categories';
 
 const STARS = [1, 2, 3, 4, 5];
 
@@ -21,11 +22,12 @@ export default function PlaceDetailPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    Promise.all([getPlaces(), getReviews(placeId)])
-      .then(([places, revs]) => {
-        setPlace(places.find(p => p.id === placeId) || null);
+    Promise.all([getPlace(placeId), getReviews(placeId)])
+      .then(([place, revs]) => {
+        setPlace(place);
         setReviews(revs);
       })
+      .catch(() => setPlace(null))
       .finally(() => setLoading(false));
   }, [placeId]);
 
@@ -43,8 +45,8 @@ export default function PlaceDetailPage() {
       setReviews(prev => [r, ...prev]);
       setShowForm(false);
       setForm({ authorName: '', rating: 5, content: '', visitedAt: new Date().toISOString().slice(0, 10) });
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '후기 작성에 실패했습니다.');
     } finally {
       setSubmitting(false);
     }
@@ -84,23 +86,13 @@ export default function PlaceDetailPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         {/* Hero image or category gradient */}
-        {(() => {
-          const CATEGORY_GRADIENT: Record<string, string> = {
-            CAFE: 'from-[#8B5E3C] to-[#C8936C]',
-            RESTAURANT: 'from-[#E8593A] to-[#F5A574]',
-            BAR: 'from-[#2D264B] to-[#6B5B9E]',
-            ACTIVITY: 'from-[#2E7D32] to-[#66BB6A]',
-            ETC: 'from-[#9D8DC2] to-[#C4B8E0]',
-          };
-          const gradient = CATEGORY_GRADIENT[place.category] ?? CATEGORY_GRADIENT.ETC;
-          return place.imageUrl ? (
-            <div className="w-full h-48 rounded-[20px] overflow-hidden shadow-sm">
-              <img src={place.imageUrl} alt={place.name} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className={`w-full h-48 rounded-[20px] bg-gradient-to-br ${gradient} shadow-sm`} />
-          );
-        })()}
+        {place.imageUrl ? (
+          <div className="w-full h-48 rounded-[20px] overflow-hidden shadow-sm">
+            <img src={place.imageUrl} alt={place.name} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className={`w-full h-48 rounded-[20px] bg-gradient-to-br ${CATEGORY_GRADIENT[place.category] ?? CATEGORY_GRADIENT.ETC} shadow-sm`} />
+        )}
 
         {/* 장소 정보 */}
         <div className="bg-white rounded-[20px] p-6 border border-border shadow-sm">

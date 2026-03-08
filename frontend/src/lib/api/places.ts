@@ -1,4 +1,4 @@
-import { API_BASE as API_URL } from './config';
+import { apiFetch } from './config';
 
 export type PlaceStatus = 'WANT_TO_GO' | 'VISITED';
 
@@ -41,84 +41,60 @@ export interface PlaceSearchResult {
   phone: string | null;
 }
 
-export async function getPlaces(category?: string): Promise<Place[]> {
+export function getPlaces(category?: string): Promise<Place[]> {
   const params = category ? `?category=${category}` : '';
-  const res = await fetch(`${API_URL}/api/places${params}`, { cache: 'no-store', credentials: 'include' });
-  if (!res.ok) throw new Error('장소 목록을 불러오지 못했습니다.');
-  return res.json();
+  return apiFetch(`/api/places${params}`, { cache: 'no-store' });
 }
 
-export async function addPlace(data: AddPlaceRequest): Promise<Place> {
-  const res = await fetch(`${API_URL}/api/places`, {
+export function getPlace(id: number): Promise<Place> {
+  return apiFetch(`/api/places/${id}`, { cache: 'no-store' });
+}
+
+export function addPlace(data: AddPlaceRequest): Promise<Place> {
+  return apiFetch('/api/places', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-    credentials: 'include',
   });
-  if (!res.ok) throw new Error('장소 추가에 실패했습니다.');
-  return res.json();
 }
 
-export async function markVisited(id: number): Promise<Place> {
-  const res = await fetch(`${API_URL}/api/places/${id}/visit`, {
-    method: 'PATCH',
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('방문 완료 처리에 실패했습니다.');
-  return res.json();
+export function markVisited(id: number): Promise<Place> {
+  return apiFetch(`/api/places/${id}/visit`, { method: 'PATCH' });
 }
 
 export async function deletePlace(id: number): Promise<void> {
-  const res = await fetch(`${API_URL}/api/places/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('장소 삭제에 실패했습니다.');
+  await apiFetch(`/api/places/${id}`, { method: 'DELETE' });
 }
 
-export async function getPopularPlaces(limit = 10): Promise<Place[]> {
-  const res = await fetch(`${API_URL}/api/places/popular?limit=${limit}`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('인기 장소를 불러오지 못했습니다.');
-  return res.json();
+export function getPopularPlaces(limit = 10): Promise<Place[]> {
+  return apiFetch(`/api/places/popular?limit=${limit}`, { cache: 'no-store' });
 }
 
-export async function getRecentPlaces(limit = 20): Promise<Place[]> {
-  const res = await fetch(`${API_URL}/api/places/recent?limit=${limit}`, { cache: 'no-store' });
-  if (!res.ok) throw new Error('최신 장소를 불러오지 못했습니다.');
-  return res.json();
+export function getRecentPlaces(limit = 20): Promise<Place[]> {
+  return apiFetch(`/api/places/recent?limit=${limit}`, { cache: 'no-store' });
 }
 
 export async function fetchPlacePreview(url: string): Promise<PlacePreview> {
-  const res = await fetch(`${API_URL}/api/places/preview?url=${encodeURIComponent(url)}`);
-  if (!res.ok) return { title: null, imageUrl: null, address: null, description: null };
-  return res.json();
+  try {
+    return await apiFetch(`/api/places/preview?url=${encodeURIComponent(url)}`);
+  } catch {
+    return { title: null, imageUrl: null, address: null, description: null };
+  }
 }
 
 export async function searchPlaces(keyword: string): Promise<PlaceSearchResult[]> {
   if (!keyword.trim()) return [];
-  const res = await fetch(`${API_URL}/api/places/search?keyword=${encodeURIComponent(keyword)}`, {
-    credentials: 'include',
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '(unreadable)');
-    console.error(`[searchPlaces] ${res.status} ${res.statusText} - keyword: ${keyword} - body: ${body}`);
+  try {
+    return await apiFetch(`/api/places/search?keyword=${encodeURIComponent(keyword)}`);
+  } catch {
     return [];
   }
-  return res.json();
 }
 
-export async function likePlace(id: number): Promise<void> {
-  const res = await fetch(`${API_URL}/api/places/${id}/like`, {
-    method: 'POST',
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('좋아요 처리에 실패했습니다.');
+export function likePlace(id: number): Promise<void> {
+  return apiFetch(`/api/places/${id}/like`, { method: 'POST' });
 }
 
-export async function unlikePlace(id: number): Promise<void> {
-  const res = await fetch(`${API_URL}/api/places/${id}/like`, {
-    method: 'DELETE',
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('좋아요 취소에 실패했습니다.');
+export function unlikePlace(id: number): Promise<void> {
+  return apiFetch(`/api/places/${id}/like`, { method: 'DELETE' });
 }
