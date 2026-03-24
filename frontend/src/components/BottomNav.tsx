@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Compass, MapPin, Users, User } from 'lucide-react';
+import { Home, Compass, MapPin, Users, User, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useTheme } from '@/lib/theme/ThemeContext';
 
 const NAV_ITEMS = [
   { href: '/', label: '홈', Icon: Home },
@@ -15,11 +16,12 @@ const NAV_ITEMS = [
 export default function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { toggle, resolved } = useTheme();
   const profileHref = user ? '/profile' : '/auth/login';
   const profileLabel = user ? user.nickname : '로그인';
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#F8F7FB]/90 backdrop-blur-md border-t border-[rgba(45,38,75,0.07)] z-20">
+    <nav className="fixed bottom-0 left-0 right-0 bg-bg/90 backdrop-blur-md border-t border-border z-20">
       <div className="max-w-2xl mx-auto flex">
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const active = href === '/'
@@ -28,23 +30,33 @@ export default function BottomNav() {
           return (
             <Link key={href} href={href}
               className={`flex-1 flex flex-col items-center pt-0.5 pb-3 text-xs transition relative ${
-                active ? 'text-[#9D8DC2]' : 'text-[rgba(45,38,75,0.35)] hover:text-[#2D264B]'
+                active ? 'text-primary' : 'text-text-muted hover:text-text-main'
               }`}>
-              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#9D8DC2]" />}
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary" />}
               <span className="mb-1 mt-2"><Icon size={20} strokeWidth={1} /></span>
-              <span className={`font-medium tracking-[-0.02em] ${active ? 'text-[#9D8DC2]' : ''}`}>{label}</span>
+              <span className={`font-medium tracking-[-0.02em] ${active ? 'text-primary' : ''}`}>{label}</span>
             </Link>
           );
         })}
+        {/* 다크모드 토글 */}
+        <button
+          onClick={toggle}
+          className="flex-1 flex flex-col items-center pt-0.5 pb-3 text-xs transition text-text-muted hover:text-text-main"
+        >
+          <span className="mb-1 mt-2">
+            {resolved === 'dark' ? <Sun size={20} strokeWidth={1} /> : <Moon size={20} strokeWidth={1} />}
+          </span>
+          <span className="font-medium tracking-[-0.02em]">{resolved === 'dark' ? '라이트' : '다크'}</span>
+        </button>
         {/* 프로필 / 로그인 탭 */}
         <Link href={profileHref}
           className={`flex-1 flex flex-col items-center pt-0.5 pb-3 text-xs transition relative ${
             pathname.startsWith('/auth') || pathname === '/profile'
-              ? 'text-[#9D8DC2]'
-              : 'text-[rgba(45,38,75,0.35)] hover:text-[#2D264B]'
+              ? 'text-primary'
+              : 'text-text-muted hover:text-text-main'
           }`}>
           {(pathname.startsWith('/auth') || pathname === '/profile') && (
-            <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#9D8DC2]" />
+            <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary" />
           )}
           <span className="mb-1 mt-2">
             {user?.profileImageUrl ? (
@@ -53,7 +65,7 @@ export default function BottomNav() {
               <User size={20} strokeWidth={1} />
             )}
           </span>
-          <span className={`font-medium tracking-[-0.02em] truncate max-w-[48px] ${pathname.startsWith('/auth') || pathname === '/profile' ? 'text-[#9D8DC2]' : ''}`}>
+          <span className={`font-medium tracking-[-0.02em] truncate max-w-[48px] ${pathname.startsWith('/auth') || pathname === '/profile' ? 'text-primary' : ''}`}>
             {profileLabel}
           </span>
         </Link>

@@ -36,32 +36,32 @@ export default function ExplorePage() {
     : places;
 
   return (
-    <div className="min-h-screen bg-[#F8F7FB]">
+    <div className="min-h-screen bg-bg">
       {/* Header */}
       <div className="max-w-2xl mx-auto px-4 pt-10 pb-4">
         <div className="flex items-center gap-2 mb-1">
-          <Compass size={18} strokeWidth={1} stroke="#9D8DC2" />
-          <p className="text-[10px] font-semibold text-[#9D8DC2] tracking-[0.14em] uppercase">Explore</p>
+          <Compass size={18} strokeWidth={1} className="text-primary" />
+          <p className="text-[10px] font-semibold text-primary tracking-[0.14em] uppercase">Explore</p>
         </div>
-        <h1 className="text-2xl font-bold text-[#2D264B] tracking-[-0.04em]">장소 탐색</h1>
-        <p className="text-sm text-[rgba(45,38,75,0.45)] mt-1 tracking-[-0.02em]">
+        <h1 className="text-2xl font-bold text-text-main tracking-[-0.04em]">장소 탐색</h1>
+        <p className="text-sm text-text-muted mt-1 tracking-[-0.02em]">
           모든 장소를 자유롭게 둘러보세요
         </p>
       </div>
 
       {/* Sort tabs + Category filter (sticky) */}
-      <div className="sticky top-0 z-10 bg-[#F8F7FB]/95 backdrop-blur-sm border-b border-[rgba(45,38,75,0.05)]">
+      <div className="sticky top-0 z-10 bg-bg/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-2xl mx-auto px-4 pt-3 pb-3">
           {/* Sort tabs */}
-          <div className="inline-flex bg-[#EFEDF7] rounded-2xl p-1 gap-1 mb-3">
+          <div className="inline-flex bg-surface rounded-2xl p-1 gap-1 mb-3">
             {(['recent', 'popular'] as SortMode[]).map(mode => (
               <button
                 key={mode}
                 onClick={() => setSort(mode)}
                 className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                   sort === mode
-                    ? 'bg-[#2D264B] text-white shadow-sm'
-                    : 'text-[rgba(45,38,75,0.45)] hover:text-[#2D264B]'
+                    ? 'bg-text-main text-text-on-primary shadow-sm'
+                    : 'text-text-muted hover:text-text-main'
                 }`}
               >
                 {mode === 'recent' ? '최신순' : '인기순'}
@@ -77,8 +77,8 @@ export default function ExplorePage() {
                 onClick={() => setCategory(c.value)}
                 className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
                   category === c.value
-                    ? 'bg-[#9D8DC2] text-white border-[#9D8DC2] shadow-[0_4px_12px_rgba(157,141,194,0.35)]'
-                    : 'bg-white text-[rgba(45,38,75,0.5)] border-[rgba(45,38,75,0.1)] hover:border-[#9D8DC2]'
+                    ? 'bg-primary text-text-on-primary border-primary shadow-md'
+                    : 'bg-bg text-text-muted border-border hover:border-primary'
                 }`}
               >
                 {c.label}
@@ -92,18 +92,18 @@ export default function ExplorePage() {
       <main className="max-w-2xl mx-auto px-4 pt-5 pb-28">
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-[3px] border-[rgba(157,141,194,0.2)] border-t-[#9D8DC2] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-[3px] border-surface border-t-primary rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-14 h-14 rounded-full bg-[#EFEDF7] flex items-center justify-center mx-auto mb-4">
-              <MapPin size={24} strokeWidth={1} stroke="#9D8DC2" />
+            <div className="w-14 h-14 rounded-full bg-surface flex items-center justify-center mx-auto mb-4">
+              <MapPin size={24} strokeWidth={1} className="text-primary" />
             </div>
-            <p className="font-semibold text-[#2D264B] tracking-[-0.02em]">아직 장소가 없어요</p>
-            <p className="text-sm text-[rgba(45,38,75,0.4)] mt-1">첫 번째로 장소를 등록해보세요</p>
+            <p className="font-semibold text-text-main tracking-[-0.02em]">아직 장소가 없어요</p>
+            <p className="text-sm text-text-muted mt-1">첫 번째로 장소를 등록해보세요</p>
             <Link
               href="/places"
-              className="mt-4 inline-flex items-center gap-1.5 bg-[#9D8DC2] text-white text-xs font-semibold px-4 py-2.5 rounded-full"
+              className="mt-4 inline-flex items-center gap-1.5 bg-primary text-text-on-primary text-xs font-semibold px-4 py-2.5 rounded-full"
             >
               장소 등록하기 <ArrowRight size={11} strokeWidth={1} />
             </Link>
@@ -113,8 +113,7 @@ export default function ExplorePage() {
             {filtered.map(place => {
               const gradient = CATEGORY_GRADIENT[place.category] ?? CATEGORY_GRADIENT.ETC;
               return (
-                <div key={place.id} className="group bg-white rounded-[20px] border border-[rgba(45,38,75,0.07)] shadow-[0_2px_12px_rgba(45,38,75,0.05)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(45,38,75,0.1)] transition-all duration-200 overflow-hidden">
-                  {/* 상단 이미지/그라데이션 */}
+                <div key={place.id} className="group bg-bg rounded-[20px] border border-border shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 overflow-hidden">
                   <Link href={`/places/${place.id}`} className="block">
                     <div className="relative h-[72px]">
                       {place.imageUrl ? (
@@ -128,21 +127,20 @@ export default function ExplorePage() {
                     </div>
                   </Link>
 
-                  {/* 하단 정보 */}
                   <div className="px-3 py-2.5">
                     <Link href={`/places/${place.id}`}>
-                      <h3 className="font-semibold text-[#2D264B] text-xs tracking-[-0.02em] truncate">
+                      <h3 className="font-semibold text-text-main text-xs tracking-[-0.02em] truncate">
                         {place.name}
                       </h3>
                       {place.address && (
-                        <p className="text-[10px] text-[rgba(45,38,75,0.4)] mt-0.5 truncate">
+                        <p className="text-[10px] text-text-muted mt-0.5 truncate">
                           {place.address}
                         </p>
                       )}
                     </Link>
 
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-[9px] text-[rgba(45,38,75,0.3)]">by {place.createdBy}</p>
+                      <p className="text-[9px] text-text-muted">by {place.createdBy}</p>
                       <LikeButton
                         placeId={place.id}
                         initialLiked={place.isLiked}
@@ -159,12 +157,12 @@ export default function ExplorePage() {
 
         {/* CTA */}
         {!loading && filtered.length > 0 && (
-          <div className="mt-8 bg-[#2D264B] rounded-[24px] px-6 py-5 text-center">
+          <div className="mt-8 bg-text-main rounded-[24px] px-6 py-5 text-center">
             <p className="text-white font-semibold text-sm tracking-[-0.02em]">나도 장소 기록하기</p>
             <p className="text-white/50 text-xs mt-1">로그인 후 장소를 저장하고 좋아요를 눌러보세요</p>
             <Link
               href="/places"
-              className="mt-3 inline-flex items-center gap-1.5 bg-[#9D8DC2] text-white text-xs font-semibold px-4 py-2 rounded-full hover:shadow-[0_4px_16px_rgba(157,141,194,0.5)] transition"
+              className="mt-3 inline-flex items-center gap-1.5 bg-primary text-text-on-primary text-xs font-semibold px-4 py-2 rounded-full hover:shadow-lg transition"
             >
               시작하기 <ArrowRight size={10} strokeWidth={1} />
             </Link>

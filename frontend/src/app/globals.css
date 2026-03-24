@@ -1,25 +1,54 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════
+   GoGo Design System — Lavender Pastel Theme
+   Light: white bg + lavender accents
+   Dark:  deep slate bg + muted lavender accents
+   ═══════════════════════════════════════════════ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  /* Sophisticated Lavender System */
-  --color-bg: #F8F7FB;
-  --color-primary: #9D8DC2;
-  --color-text-main: #2D264B;
-  --color-text-muted: rgba(45,38,75,0.45);
-  --color-surface: #EFEDF7;
-  --color-border: rgba(45,38,75,0.08);
-  --color-accent: #FFB5C5;
-  /* Legacy aliases */
-  --color-mint: #9D8DC2;
-  --color-green: #2D264B;
-  --color-green-mid: #4A3F6E;
-  --color-card-bg: #EFEDF7;
+  /* ── Light mode (default) ── */
+  --color-bg:          #FFFFFF;
+  --color-bg-secondary: #F6F4FB;
+  --color-surface:     #F0EDF8;
+  --color-surface-hover: #E8E4F3;
+
+  --color-primary:     #9D8DC2;
+  --color-primary-hover: #8A79B4;
+  --color-primary-subtle: #EDE9F6;
+
+  --color-text-main:   #2D264B;
+  --color-text-secondary: #5C5478;
+  --color-text-muted:  #9690AD;
+  --color-text-on-primary: #FFFFFF;
+
+  --color-border:      #E8E4F0;
+  --color-border-hover: #D4CDE4;
+
+  --color-accent:      #FFB5C5;
+  --color-accent-bg:   #FFF0F4;
+  --color-accent-text: #D4436A;
+
+  --color-danger:      #E05178;
+  --color-danger-bg:   #FFF0F4;
+
+  --color-success:     #6BBF7B;
+  --color-success-bg:  #F0FAF2;
+
+  /* Legacy aliases (backward compat) */
+  --color-mint:        #9D8DC2;
+  --color-green:       #2D264B;
+  --color-green-mid:   #4A3F6E;
+  --color-card-bg:     #F0EDF8;
 }
 
+/* ── Base styles ── */
 body {
-  background: #F8F7FB;
-  color: #2D264B;
+  background: var(--color-bg);
+  color: var(--color-text-main);
   font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
@@ -29,6 +58,42 @@ body {
   transition-duration: 200ms;
 }
 
+/* ── Dark mode overrides ── */
+.dark {
+  --color-bg:          #1A1726;
+  --color-bg-secondary: #221F30;
+  --color-surface:     #2A2640;
+  --color-surface-hover: #353050;
+
+  --color-primary:     #B0A0D8;
+  --color-primary-hover: #C4B8E6;
+  --color-primary-subtle: #2E2A42;
+
+  --color-text-main:   #EDEAF5;
+  --color-text-secondary: #B5B0C8;
+  --color-text-muted:  #7A7494;
+  --color-text-on-primary: #1A1726;
+
+  --color-border:      #363150;
+  --color-border-hover: #4A4468;
+
+  --color-accent:      #FF9DB2;
+  --color-accent-bg:   #2D1F28;
+  --color-accent-text: #FFB5C5;
+
+  --color-danger:      #FF7A9A;
+  --color-danger-bg:   #2D1F28;
+
+  --color-success:     #7DD88C;
+  --color-success-bg:  #1C2D1F;
+
+  --color-mint:        #B0A0D8;
+  --color-green:       #EDEAF5;
+  --color-green-mid:   #C4B8E6;
+  --color-card-bg:     #2A2640;
+}
+
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -39,7 +104,8 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(157,141,194,0.3);
+  background: var(--color-primary);
+  opacity: 0.3;
   border-radius: 9999px;
 }
 

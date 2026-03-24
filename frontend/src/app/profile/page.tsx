@@ -23,8 +23,8 @@ export default function ProfilePage() {
               className="w-20 h-20 rounded-full object-cover"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
-              <User size={36} strokeWidth={1} className="text-gray-400" />
+            <div className="w-20 h-20 rounded-full bg-surface flex items-center justify-center">
+              <User size={36} strokeWidth={1} className="text-text-muted" />
             </div>
           )}
           <p className="text-lg font-semibold text-text-main">{user.nickname}</p>
@@ -32,7 +32,7 @@ export default function ProfilePage() {
 
         <button
           onClick={logout}
-          className="w-full py-3 rounded-[14px] text-sm font-semibold text-red-500 border border-red-200 hover:bg-red-50 transition"
+          className="w-full py-3 rounded-[14px] text-sm font-semibold text-danger border border-danger/30 hover:bg-danger-bg transition"
         >
           로그아웃
         </button>
