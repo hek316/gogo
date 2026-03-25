@@ -184,7 +184,7 @@ export default function MeetingPage() {
         {meeting.status === 'CONFIRMED' && (
           <div className="bg-gradient-to-br from-primary to-primary-hover rounded-[20px] p-5 text-center text-white">
             <div className="flex justify-center mb-2">
-              <Sparkles size={32} strokeWidth={1.5} stroke="white" />
+              <Sparkles size={32} strokeWidth={1.5} className="text-text-on-primary" />
             </div>
             <p className="font-bold text-lg">
               {places[meeting.confirmedPlaceId!]?.name || '장소'} 확정!

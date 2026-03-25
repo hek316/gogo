@@ -97,7 +97,7 @@ export default async function Home() {
             className="col-span-2 bg-primary rounded-[28px] p-5 shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
           >
             <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center mb-4">
-              <Users size={15} strokeWidth={1} stroke="white" />
+              <Users size={15} strokeWidth={1} className="text-text-on-primary" />
             </div>
             <p className="font-semibold text-white text-sm tracking-[-0.03em]">그룹 & 약속</p>
             <p className="text-white/55 text-xs mt-1 tracking-[-0.02em]">투표로 결정</p>
@@ -127,7 +127,7 @@ export default async function Home() {
             <div className="flex items-center justify-between mb-3 px-0.5">
               <div className="flex items-center gap-2">
                 <p className="text-text-main text-sm font-semibold tracking-[-0.03em]">지금 뜨는 장소</p>
-                <Heart size={12} fill="var(--color-accent)" stroke="none" />
+                <Heart size={12} className="text-accent" fill="currentColor" stroke="none" />
               </div>
               <Link
                 href="/explore"
