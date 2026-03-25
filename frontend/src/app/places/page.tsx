@@ -34,55 +34,52 @@ function PlaceListItem({
   }, [menuOpen]);
 
   return (
-    <div className="bg-white rounded-2xl border border-[rgba(45,38,75,0.07)] shadow-[0_2px_8px_rgba(45,38,75,0.04)] flex items-stretch overflow-hidden">
-      {/* 카테고리 색상 사각형 */}
+    <div className="bg-bg rounded-2xl border border-border shadow-sm flex items-stretch overflow-hidden">
       <div className={`w-14 flex-shrink-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
         <MapPin size={18} strokeWidth={1.5} className="text-white/80" />
       </div>
 
-      {/* 내용 */}
       <div className="flex-1 min-w-0 px-4 py-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <h3 className="font-semibold text-[#2D264B] text-sm truncate">{place.name}</h3>
+              <h3 className="font-semibold text-text-main text-sm truncate">{place.name}</h3>
               <span className={`flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                 place.status === 'VISITED'
-                  ? 'bg-[#2D264B] text-white'
-                  : 'bg-[#EFEDF7] text-[#9D8DC2]'
+                  ? 'bg-text-main text-text-on-primary'
+                  : 'bg-surface text-primary'
               }`}>
                 {place.status === 'VISITED' ? '방문완료' : '가고싶어'}
               </span>
             </div>
             {place.address && (
-              <p className="text-xs text-[rgba(45,38,75,0.4)] truncate">{place.address}</p>
+              <p className="text-xs text-text-muted truncate">{place.address}</p>
             )}
             {place.note && (
-              <p className="text-xs text-[rgba(45,38,75,0.35)] mt-1 truncate">{place.note}</p>
+              <p className="text-xs text-text-muted mt-1 truncate">{place.note}</p>
             )}
           </div>
 
-          {/* ··· 메뉴 */}
           <div ref={menuRef} className="relative flex-shrink-0">
             <button
               onClick={() => setMenuOpen(v => !v)}
-              className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#EFEDF7] transition-colors"
+              className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface transition-colors"
             >
-              <MoreHorizontal size={15} strokeWidth={1.5} stroke="rgba(45,38,75,0.4)" />
+              <MoreHorizontal size={15} strokeWidth={1.5} className="text-text-muted" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 z-20 bg-white rounded-xl shadow-[0_8px_32px_rgba(45,38,75,0.15)] border border-[rgba(45,38,75,0.08)] py-1 min-w-[140px]">
+              <div className="absolute right-0 top-8 z-20 bg-bg rounded-xl shadow-lg border border-border py-1 min-w-[140px]">
                 {place.status === 'WANT_TO_GO' && (
                   <button
                     onClick={() => { setMenuOpen(false); onVisit(place.id); }}
-                    className="w-full text-left text-xs px-4 py-2.5 text-[#2D264B] hover:bg-[#EFEDF7] transition-colors"
+                    className="w-full text-left text-xs px-4 py-2.5 text-text-main hover:bg-surface transition-colors"
                   >
                     방문완료로 변경
                   </button>
                 )}
                 <button
                   onClick={() => { setMenuOpen(false); onDelete(place.id); }}
-                  className="w-full text-left text-xs px-4 py-2.5 text-red-400 hover:bg-red-50 transition-colors"
+                  className="w-full text-left text-xs px-4 py-2.5 text-danger hover:bg-danger-bg transition-colors"
                 >
                   삭제
                 </button>
@@ -150,32 +147,30 @@ export default function PlacesPage() {
   const visitedCount = places.filter(p => p.status === 'VISITED').length;
 
   return (
-    <div className="min-h-screen bg-[#F8F7FB]">
-      <header className="bg-white border-b border-[rgba(45,38,75,0.08)] sticky top-0 z-10">
+    <div className="min-h-screen bg-bg">
+      <header className="bg-bg border-b border-border sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-5 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-[#2D264B] tracking-tight">내 장소</h1>
-          <span className="text-xs text-[rgba(45,38,75,0.4)]">총 {places.length}개</span>
+          <h1 className="text-lg font-bold text-text-main tracking-tight">내 장소</h1>
+          <span className="text-xs text-text-muted">총 {places.length}개</span>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-5">
-        {/* 통계 바 */}
         {!loading && places.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mb-5">
             {[
-              { label: '전체', count: places.length, color: 'text-[#2D264B]', bg: 'bg-white' },
-              { label: '가고싶어', count: wantCount, color: 'text-[#9D8DC2]', bg: 'bg-[#EFEDF7]' },
-              { label: '방문완료', count: visitedCount, color: 'text-[#2D264B]', bg: 'bg-[#2D264B]/5' },
+              { label: '전체', count: places.length, color: 'text-text-main', bg: 'bg-bg-secondary' },
+              { label: '가고싶어', count: wantCount, color: 'text-primary', bg: 'bg-surface' },
+              { label: '방문완료', count: visitedCount, color: 'text-text-main', bg: 'bg-bg-secondary' },
             ].map(({ label, count, color, bg }) => (
-              <div key={label} className={`${bg} rounded-2xl px-4 py-3 border border-[rgba(45,38,75,0.07)]`}>
+              <div key={label} className={`${bg} rounded-2xl px-4 py-3 border border-border`}>
                 <p className={`text-xl font-bold ${color}`}>{count}</p>
-                <p className="text-[10px] text-[rgba(45,38,75,0.4)] mt-0.5">{label}</p>
+                <p className="text-[10px] text-text-muted mt-0.5">{label}</p>
               </div>
             ))}
           </div>
         )}
 
-        {/* 상태 탭 */}
         <div className="flex gap-2 mb-5">
           {([
             { value: 'ALL', label: '전체' },
@@ -187,8 +182,8 @@ export default function PlacesPage() {
               onClick={() => setStatusFilter(tab.value)}
               className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
                 statusFilter === tab.value
-                  ? 'bg-[#2D264B] text-white shadow-sm'
-                  : 'bg-white text-[rgba(45,38,75,0.45)] border border-[rgba(45,38,75,0.1)] hover:border-[#9D8DC2]'
+                  ? 'bg-text-main text-text-on-primary shadow-sm'
+                  : 'bg-bg text-text-muted border border-border hover:border-primary'
               }`}
             >
               {tab.label}
@@ -196,18 +191,17 @@ export default function PlacesPage() {
           ))}
         </div>
 
-        {/* 리스트 */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-[3px] border-[rgba(157,141,194,0.2)] border-t-[#9D8DC2] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-[3px] border-surface border-t-primary rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-5xl mb-4">🗺️</div>
-            <p className="font-semibold text-[#2D264B] tracking-[-0.02em]">
+            <p className="font-semibold text-text-main tracking-[-0.02em]">
               {statusFilter === 'ALL' ? '아직 저장한 장소가 없어요' : '해당 장소가 없어요'}
             </p>
-            <p className="text-sm text-[rgba(45,38,75,0.4)] mt-1">
+            <p className="text-sm text-text-muted mt-1">
               {statusFilter === 'ALL' ? '+ 버튼으로 첫 장소를 추가해보세요!' : '다른 탭을 확인해보세요'}
             </p>
           </div>

@@ -26,14 +26,12 @@ export default function LikeButton({ placeId, initialLiked, initialCount, size =
     e.stopPropagation();
 
     if (!user) {
-      // 비로그인: 카카오 로그인 페이지로 이동
       window.location.href = '/auth/login';
       return;
     }
 
     if (loading) return;
 
-    // 낙관적 업데이트
     const nextLiked = !liked;
     setLiked(nextLiked);
     setCount(c => nextLiked ? c + 1 : c - 1);
@@ -46,7 +44,6 @@ export default function LikeButton({ placeId, initialLiked, initialCount, size =
         await unlikePlace(placeId);
       }
     } catch {
-      // 롤백
       setLiked(!nextLiked);
       setCount(c => nextLiked ? c - 1 : c + 1);
     } finally {
@@ -59,8 +56,8 @@ export default function LikeButton({ placeId, initialLiked, initialCount, size =
       onClick={handleClick}
       className={`flex items-center gap-1 px-2 py-1 rounded-full transition-all ${
         liked
-          ? 'bg-[#FFE4EC] text-[#E05178]'
-          : 'bg-[rgba(45,38,75,0.06)] text-[rgba(45,38,75,0.4)] hover:bg-[#FFE4EC] hover:text-[#E05178]'
+          ? 'bg-accent-bg text-accent-text'
+          : 'bg-surface text-text-muted hover:bg-accent-bg hover:text-accent-text'
       }`}
     >
       <Heart

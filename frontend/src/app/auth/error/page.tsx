@@ -16,7 +16,7 @@ function ErrorContent() {
       <p className="text-sm text-text-muted mb-8">{message}</p>
       <button
         onClick={() => router.replace('/auth/login')}
-        className="bg-green text-white rounded-[16px] px-8 py-3 text-sm font-medium hover:bg-green-mid transition"
+        className="bg-text-main text-text-on-primary rounded-[16px] px-8 py-3 text-sm font-medium hover:bg-text-secondary transition"
       >
         다시 시도하기
       </button>
