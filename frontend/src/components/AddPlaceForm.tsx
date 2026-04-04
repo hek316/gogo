@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { addPlace, fetchPlacePreview, searchPlaces, AddPlaceRequest, Place, PlacePreview, PlaceSearchResult } from '@/lib/api/places';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { Loader2, ImageIcon, CheckCircle2, Search } from 'lucide-react';
@@ -167,7 +168,8 @@ export default function AddPlaceForm({ onAdded }: Props) {
           if (!user) { loginWithKakao(); return; }
           setOpen(true);
         }}
-        className="fixed bottom-20 right-5 bg-primary hover:bg-primary-hover text-text-on-primary rounded-full w-14 h-14 text-2xl flex items-center justify-center font-bold shadow-lg hover:scale-[1.02] transition-all duration-150"
+        aria-label="장소 추가"
+        className="fixed bottom-20 right-5 bg-primary hover:bg-primary-hover text-text-on-primary rounded-full w-14 h-14 text-2xl flex items-center justify-center font-bold shadow-lg hover:scale-[1.02] transition-colors duration-150"
       >
         +
       </button>
@@ -175,11 +177,11 @@ export default function AddPlaceForm({ onAdded }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-bg w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-lg border-t border-border max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="add-place-title">
+      <div className="bg-bg w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-lg border-t border-border max-h-[90vh] overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
         <div className="flex justify-between items-center mb-5">
-          <h2 className="text-lg font-semibold text-text-main">장소 추가</h2>
-          <button onClick={handleClose}
+          <h2 id="add-place-title" className="text-lg font-semibold text-text-main">장소 추가</h2>
+          <button onClick={handleClose} aria-label="닫기"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-surface text-primary hover:bg-surface-hover text-sm font-bold">
             ✕
           </button>
@@ -195,7 +197,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
               <input
                 ref={nameInputRef}
                 required
-                placeholder="어떤 장소를 추가할까요?"
+                placeholder="어떤 장소를 추가할까요?…"
                 value={form.name}
                 onChange={e => handleNameChange(e.target.value)}
                 onFocus={() => { if (searchResults.length > 0) setShowDropdown(true); }}
@@ -231,15 +233,17 @@ export default function AddPlaceForm({ onAdded }: Props) {
           </div>
 
           {previewLoading && (
-            <div className="flex items-center gap-2 px-1 text-xs text-text-muted">
-              <Loader2 size={13} className="animate-spin" />
-              미리보기 불러오는 중...
+            <div className="flex items-center gap-2 px-1 text-xs text-text-muted" role="status" aria-live="polite">
+              <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+              미리보기 불러오는 중…
             </div>
           )}
           {preview && (preview.title || preview.imageUrl) && (
             <div className="bg-bg-secondary rounded-[16px] border border-border overflow-hidden">
               {preview.imageUrl && (
-                <img src={preview.imageUrl} alt="" className="w-full h-32 object-cover" />
+                <div className="relative w-full h-32">
+                  <Image src={preview.imageUrl} alt="" fill className="object-cover" sizes="(max-width: 448px) 100vw, 448px" />
+                </div>
               )}
               {!preview.imageUrl && (
                 <div className="w-full h-20 bg-surface flex items-center justify-center">
@@ -264,13 +268,13 @@ export default function AddPlaceForm({ onAdded }: Props) {
 
           <p className="text-xs font-medium text-text-muted mt-1">장소 정보</p>
           <input
-            placeholder="주소"
+            placeholder="주소…" aria-label="주소"
             value={form.address}
             onChange={e => { setAutoFilled(f => ({ ...f, address: false })); setForm(f => ({ ...f, address: e.target.value })); }}
             className={`w-full border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors duration-300 ${autoFilled.address ? 'bg-primary-subtle border-primary' : 'bg-bg border-border'}`}
           />
           <select
-            value={form.category}
+            value={form.category} aria-label="카테고리"
             onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
             className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-bg"
           >
@@ -283,7 +287,8 @@ export default function AddPlaceForm({ onAdded }: Props) {
             <div className="flex-1 h-px bg-border" />
           </div>
           <input
-            placeholder="네이버/카카오 지도 URL 붙여넣기"
+            type="url"
+            placeholder="네이버/카카오 지도 URL 붙여넣기…" aria-label="지도 URL"
             value={form.url}
             onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
             onBlur={handleUrlBlur}
@@ -291,7 +296,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
           />
 
           <textarea
-            placeholder="메모 (선택)"
+            placeholder="메모 (선택)…" aria-label="메모"
             value={form.note}
             onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
             rows={2}
@@ -302,7 +307,7 @@ export default function AddPlaceForm({ onAdded }: Props) {
             disabled={loading}
             className="w-full disabled:opacity-50 bg-text-main hover:bg-text-secondary text-text-on-primary rounded-[16px] py-3.5 text-sm font-medium transition"
           >
-            {loading ? '추가 중...' : '추가하기'}
+            {loading ? '추가 중…' : '추가하기'}
           </button>
           <button
             type="button"

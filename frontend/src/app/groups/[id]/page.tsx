@@ -77,8 +77,9 @@ export default function GroupDetailPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-bg">
+    <div className="min-h-screen flex items-center justify-center bg-bg" role="status">
       <div className="w-8 h-8 border-4 border-surface border-t-primary rounded-full animate-spin" />
+      <span className="sr-only">로딩 중…</span>
     </div>
   );
 
@@ -91,8 +92,8 @@ export default function GroupDetailPage() {
     <div className="min-h-screen bg-bg">
       <header className="bg-bg border-b border-border sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <button onClick={() => router.push('/groups')} className="text-text-muted hover:text-text-main">
-            <ChevronLeft size={20} strokeWidth={1.5} />
+          <button onClick={() => router.push('/groups')} aria-label="뒤로 가기" className="text-text-muted hover:text-text-main">
+            <ChevronLeft size={20} strokeWidth={1.5} aria-hidden="true" />
           </button>
           <h1 className="text-xl font-semibold text-text-main flex-1 truncate">{group.name}</h1>
           {groupPlaces.length >= 2 && (
@@ -182,17 +183,17 @@ export default function GroupDetailPage() {
 
       {/* 장소 공유 모달 */}
       {shareModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50">
-          <div className="bg-bg w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-lg border-t border-border">
+        <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+          <div className="bg-bg w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-lg border-t border-border" style={{ overscrollBehavior: 'contain' }}>
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-semibold text-text-main">장소 공유하기</h2>
-              <button onClick={() => setShareModal(false)}
+              <h2 id="share-modal-title" className="text-lg font-semibold text-text-main">장소 공유하기</h2>
+              <button onClick={() => setShareModal(false)} aria-label="닫기"
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-surface text-primary hover:bg-surface-hover text-sm font-bold">
                 ✕
               </button>
             </div>
             <form onSubmit={handleShare} className="space-y-3">
-              <select required value={shareForm.placeId}
+              <select required value={shareForm.placeId} aria-label="공유할 장소"
                 onChange={e => setShareForm(f => ({ ...f, placeId: e.target.value }))}
                 className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-bg">
                 <option value="">공유할 장소 선택</option>
@@ -211,27 +212,27 @@ export default function GroupDetailPage() {
 
       {/* 약속 만들기 모달 */}
       {meetingModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50">
-          <div className="bg-bg w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-lg border-t border-border max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="meeting-modal-title">
+          <div className="bg-bg w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-lg border-t border-border max-h-[80vh] overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-semibold text-text-main">약속 만들기</h2>
-              <button onClick={() => setMeetingModal(false)}
+              <h2 id="meeting-modal-title" className="text-lg font-semibold text-text-main">약속 만들기</h2>
+              <button onClick={() => setMeetingModal(false)} aria-label="닫기"
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-surface text-primary hover:bg-surface-hover text-sm font-bold">
                 ✕
               </button>
             </div>
             <form onSubmit={handleCreateMeeting} className="space-y-4">
-              <input required placeholder="약속 이름 (예: 이번 주 약속)"
+              <input required placeholder="약속 이름 (예: 이번 주 약속)…" aria-label="약속 이름" name="meetingTitle" autoComplete="off"
                 value={meetingForm.title}
                 onChange={e => setMeetingForm(f => ({ ...f, title: e.target.value }))}
                 className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-bg"
               />
-              <div>
-                <p className="text-sm font-medium text-text-main mb-2">후보 장소 선택 (2개 이상)</p>
+              <fieldset>
+                <legend className="text-sm font-medium text-text-main mb-2">후보 장소 선택 (2개 이상)</legend>
                 <div className="space-y-2">
                   {groupPlaces.map(gp => (
                     <label key={gp.id}
-                      className={`flex items-center gap-3 p-3 rounded-[12px] border cursor-pointer transition ${
+                      className={`flex items-center gap-3 p-3 rounded-[12px] border cursor-pointer transition-colors ${
                         meetingForm.candidatePlaceIds.includes(gp.place.id)
                           ? 'border-primary/40 bg-primary-subtle'
                           : 'border-border hover:border-primary/50'
@@ -239,17 +240,17 @@ export default function GroupDetailPage() {
                       <input type="checkbox"
                         checked={meetingForm.candidatePlaceIds.includes(gp.place.id)}
                         onChange={() => toggleCandidate(gp.place.id)}
-                        className="hidden"
+                        className="sr-only"
                       />
                       <span className="text-sm text-text-muted">{CATEGORY_LABEL[gp.place.category] ?? '기타'}</span>
                       <span className="text-sm font-medium text-text-main">{gp.place.name}</span>
                       {meetingForm.candidatePlaceIds.includes(gp.place.id) && (
-                        <span className="ml-auto text-primary text-sm font-bold">✓</span>
+                        <span className="ml-auto text-primary text-sm font-bold" aria-hidden="true">✓</span>
                       )}
                     </label>
                   ))}
                 </div>
-              </div>
+              </fieldset>
               <button type="submit"
                 className="w-full bg-text-main hover:bg-text-secondary text-text-on-primary rounded-[16px] py-3.5 text-sm font-medium">
                 약속 만들기

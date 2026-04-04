@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
+import Image from 'next/image';
 import { User } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -17,10 +18,12 @@ export default function ProfilePage() {
 
         <div className="flex flex-col items-center gap-4 mb-10">
           {user.profileImageUrl ? (
-            <img
+            <Image
               src={user.profileImageUrl}
               alt={user.nickname}
-              className="w-20 h-20 rounded-full object-cover"
+              width={80}
+              height={80}
+              className="rounded-full object-cover"
             />
           ) : (
             <div className="w-20 h-20 rounded-full bg-surface flex items-center justify-center">
