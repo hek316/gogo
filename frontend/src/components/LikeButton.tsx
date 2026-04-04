@@ -54,7 +54,9 @@ export default function LikeButton({ placeId, initialLiked, initialCount, size =
   return (
     <button
       onClick={handleClick}
-      className={`flex items-center gap-1 px-2 py-1 rounded-full transition-all ${
+      aria-label={liked ? '좋아요 취소' : '좋아요'}
+      aria-pressed={liked}
+      className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${
         liked
           ? 'bg-accent-bg text-accent-text'
           : 'bg-surface text-text-muted hover:bg-accent-bg hover:text-accent-text'
@@ -64,6 +66,7 @@ export default function LikeButton({ placeId, initialLiked, initialCount, size =
         size={iconSize}
         strokeWidth={1.5}
         fill={liked ? 'currentColor' : 'none'}
+        aria-hidden="true"
         className="transition-transform active:scale-125"
       />
       {count > 0 && (

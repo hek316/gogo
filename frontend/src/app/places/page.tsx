@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { getPlaces, markVisited, deletePlace, Place } from '@/lib/api/places';
-import AddPlaceForm from '@/components/AddPlaceForm';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { MapPin, MoreHorizontal } from 'lucide-react';
 import { CATEGORY_GRADIENT } from '@/lib/constants/categories';
+
+const AddPlaceForm = dynamic(() => import('@/components/AddPlaceForm'), {
+  ssr: false,
+});
 
 type StatusFilter = 'ALL' | 'WANT_TO_GO' | 'VISITED';
 
@@ -63,14 +67,17 @@ function PlaceListItem({
           <div ref={menuRef} className="relative flex-shrink-0">
             <button
               onClick={() => setMenuOpen(v => !v)}
+              aria-label="더보기 메뉴"
+              aria-expanded={menuOpen}
               className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-surface transition-colors"
             >
-              <MoreHorizontal size={15} strokeWidth={1.5} className="text-text-muted" />
+              <MoreHorizontal size={15} strokeWidth={1.5} className="text-text-muted" aria-hidden="true" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 z-20 bg-bg rounded-xl shadow-lg border border-border py-1 min-w-[140px]">
+              <div role="menu" className="absolute right-0 top-8 z-20 bg-bg rounded-xl shadow-lg border border-border py-1 min-w-[140px]">
                 {place.status === 'WANT_TO_GO' && (
                   <button
+                    role="menuitem"
                     onClick={() => { setMenuOpen(false); onVisit(place.id); }}
                     className="w-full text-left text-xs px-4 py-2.5 text-text-main hover:bg-surface transition-colors"
                   >
@@ -78,6 +85,7 @@ function PlaceListItem({
                   </button>
                 )}
                 <button
+                  role="menuitem"
                   onClick={() => { setMenuOpen(false); onDelete(place.id); }}
                   className="w-full text-left text-xs px-4 py-2.5 text-danger hover:bg-danger-bg transition-colors"
                 >
@@ -171,7 +179,7 @@ export default function PlacesPage() {
           </div>
         )}
 
-        <div className="flex gap-2 mb-5">
+        <div role="tablist" aria-label="상태 필터" className="flex gap-2 mb-5">
           {([
             { value: 'ALL', label: '전체' },
             { value: 'WANT_TO_GO', label: '가고싶어' },
@@ -179,8 +187,10 @@ export default function PlacesPage() {
           ] as { value: StatusFilter; label: string }[]).map(tab => (
             <button
               key={tab.value}
+              role="tab"
+              aria-selected={statusFilter === tab.value}
               onClick={() => setStatusFilter(tab.value)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+              className={`px-4 py-2 rounded-full text-xs font-semibold transition-colors ${
                 statusFilter === tab.value
                   ? 'bg-text-main text-text-on-primary shadow-sm'
                   : 'bg-bg text-text-muted border border-border hover:border-primary'
@@ -192,8 +202,9 @@ export default function PlacesPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
+          <div className="flex justify-center py-20" role="status">
             <div className="w-8 h-8 border-[3px] border-surface border-t-primary rounded-full animate-spin" />
+            <span className="sr-only">로딩 중…</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">

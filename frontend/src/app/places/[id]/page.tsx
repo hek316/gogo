@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { getPlace, markVisited, Place } from '@/lib/api/places';
 import { getReviews, addReview, Review } from '@/lib/api/reviews';
 import { ChevronLeft, Inbox, ExternalLink } from 'lucide-react';
@@ -57,8 +58,9 @@ export default function PlaceDetailPage() {
     : null;
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-bg">
+    <div className="min-h-screen flex items-center justify-center bg-bg" role="status">
       <div className="w-8 h-8 border-4 border-surface border-t-primary rounded-full animate-spin" />
+      <span className="sr-only">로딩 중…</span>
     </div>
   );
 
@@ -68,8 +70,8 @@ export default function PlaceDetailPage() {
     <div className="min-h-screen bg-bg">
       <header className="bg-bg border-b border-border sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-text-muted hover:text-text-main">
-            <ChevronLeft size={20} strokeWidth={1.5} />
+          <button onClick={() => router.back()} aria-label="뒤로 가기" className="text-text-muted hover:text-text-main">
+            <ChevronLeft size={20} strokeWidth={1.5} aria-hidden="true" />
           </button>
           <h1 className="text-lg font-semibold text-text-main flex-1 truncate">{place.name}</h1>
           {place.status === 'WANT_TO_GO' && (
@@ -86,8 +88,8 @@ export default function PlaceDetailPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         {place.imageUrl ? (
-          <div className="w-full h-48 rounded-[20px] overflow-hidden shadow-sm">
-            <img src={place.imageUrl} alt={place.name} className="w-full h-full object-cover" />
+          <div className="relative w-full h-48 rounded-[20px] overflow-hidden shadow-sm">
+            <Image src={place.imageUrl} alt={place.name} fill className="object-cover" sizes="(max-width: 672px) 100vw, 672px" priority />
           </div>
         ) : (
           <div className={`w-full h-48 rounded-[20px] bg-gradient-to-br ${CATEGORY_GRADIENT[place.category] ?? CATEGORY_GRADIENT.ETC} shadow-sm`} />
@@ -110,7 +112,7 @@ export default function PlaceDetailPage() {
               rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline"
             >
-              <ExternalLink size={14} />
+              <ExternalLink size={14} aria-hidden="true" />
               지도에서 보기
             </a>
           )}
@@ -128,30 +130,35 @@ export default function PlaceDetailPage() {
           {showForm && (
             <div className="bg-surface rounded-[20px] p-6 mb-4 border border-border">
               <form onSubmit={handleReview} className="space-y-3">
-                <input required placeholder="닉네임"
+                <input required placeholder="닉네임…" aria-label="닉네임" name="authorName" autoComplete="off"
                   value={form.authorName}
                   onChange={e => setForm(f => ({ ...f, authorName: e.target.value }))}
                   className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-bg" />
-                <div className="flex gap-1">
-                  {STARS.map(s => (
-                    <button key={s} type="button" onClick={() => setForm(f => ({ ...f, rating: s }))}
-                      className={`text-2xl transition ${s <= form.rating ? 'text-primary' : 'text-border'}`}>
-                      ★
-                    </button>
-                  ))}
-                </div>
-                <textarea placeholder="후기를 작성해주세요"
+                <fieldset>
+                  <legend className="sr-only">별점</legend>
+                  <div className="flex gap-1">
+                    {STARS.map(s => (
+                      <button key={s} type="button" onClick={() => setForm(f => ({ ...f, rating: s }))}
+                        aria-label={`별점 ${s}점`}
+                        aria-pressed={s <= form.rating}
+                        className={`text-2xl transition-colors ${s <= form.rating ? 'text-primary' : 'text-border'}`}>
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+                <textarea placeholder="후기를 작성해주세요…" aria-label="후기 내용"
                   value={form.content}
                   onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
                   rows={3}
                   className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none bg-bg" />
-                <input type="date"
+                <input type="date" aria-label="방문 날짜"
                   value={form.visitedAt}
                   onChange={e => setForm(f => ({ ...f, visitedAt: e.target.value }))}
                   className="w-full border border-border rounded-[12px] px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-bg" />
                 <button type="submit" disabled={submitting}
                   className="w-full bg-text-main hover:bg-text-secondary text-text-on-primary rounded-[16px] py-3 text-sm font-medium disabled:opacity-50">
-                  {submitting ? '제출 중...' : '후기 등록'}
+                  {submitting ? '제출 중…' : '후기 등록'}
                 </button>
               </form>
             </div>

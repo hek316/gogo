@@ -22,7 +22,7 @@
 
   --color-text-main:   #2D264B;
   --color-text-secondary: #5C5478;
-  --color-text-muted:  #9690AD;
+  --color-text-muted:  #736C8E;
   --color-text-on-primary: #FFFFFF;
 
   --color-border:      #E8E4F0;
@@ -53,9 +53,19 @@ body {
   letter-spacing: -0.02em;
 }
 
-* {
-  transition-property: color, background-color, border-color, box-shadow, transform;
-  transition-duration: 200ms;
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition-property: color, background-color, border-color, box-shadow, transform;
+    transition-duration: 200ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ── Dark mode overrides ── */
@@ -71,7 +81,7 @@ body {
 
   --color-text-main:   #EDEAF5;
   --color-text-secondary: #B5B0C8;
-  --color-text-muted:  #7A7494;
+  --color-text-muted:  #908AAC;
   --color-text-on-primary: #1A1726;
 
   --color-border:      #363150;
@@ -116,4 +126,24 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Focus visible ── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Screen reader only ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
